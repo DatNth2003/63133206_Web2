@@ -8,10 +8,11 @@
 </head>
 <body>
 	<%! int x = 10, y, z=0; %>
-	<% y = 200;
+	<%
+	y = 200;
 	z = x+y;
 	out.append("Kết quả là: ");
-	out.append(z);
+	out.append(String.valueOf(z));
 	%>
 	<h2>Kiểu Expression</h2>
 	<hr>
