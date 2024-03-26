@@ -22,18 +22,18 @@ public class ProductController {
         this.productService = productService;
     }
 
-    @GetMapping("/index")
+    @GetMapping(value = {"/index", ""})
     public String index(Model model, @RequestParam(defaultValue = "0") int page) {
         Pageable pageable = PageRequest.of(page, 6);
-        Page<thiGK.ntu63133206.models.Product> productPage = productService.findPaginated(pageable);
+        Page<Product> productPage = productService.findPaginated(pageable);
         model.addAttribute("productPage", productPage);
-        return "index";
+        return "products/index";
     }
 
     @GetMapping("/add")
     public String addProductForm(Model model) {
         model.addAttribute("product", new Product());
-        return "add_product";
+        return "products/add_product";
     }
 
     @PostMapping("/add")
@@ -46,7 +46,7 @@ public class ProductController {
     public String editProductForm(@PathVariable Long id, Model model) {
         Product product = productService.getProductById(id);
         model.addAttribute("product", product);
-        return "edit_product";
+        return "products/edit_product";
     }
 
     @PostMapping("/edit/{id}")

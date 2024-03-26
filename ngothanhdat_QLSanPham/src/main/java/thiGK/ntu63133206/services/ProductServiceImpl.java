@@ -5,21 +5,21 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
 import thiGK.ntu63133206.models.Product;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ProductServiceImpl implements ProductService {
     private static List<Product> productList = new ArrayList<>();
 
     static {
-        productList.add(new Product(1L, "Product 1", "image1.jpg", 10.5));
-        productList.add(new Product(2L, "Product 2", "image2.jpg", 20.0));
-        productList.add(new Product(3L, "Product 3", "image3.jpg", 15.75));
+        productList.add(new Product(1L, "Bút", "p-but.jpg", 10000));
+        productList.add(new Product(2L, "Gôm", "p-gom.jpg", 2000));
+        productList.add(new Product(3L, "Thước sắt", "p-thuoc-sat.jpg", 150000));
     }
 
     @Override
@@ -39,5 +39,32 @@ public class ProductServiceImpl implements ProductService {
 
         return new PageImpl<>(list, PageRequest.of(currentPage, pageSize), productList.size());
     }
-    
+
+    @Override
+    public Product addProduct(Product product) {
+        productList.add(product);
+        return product;
+    }
+
+    @Override
+    public Product getProductById(Long id) {
+        Optional<Product> result = productList.stream().filter(p -> p.getId().equals(id)).findFirst();
+        return result.orElse(null);
+    }
+
+    @Override
+    public Product updateProduct(Product product) {
+        for (int i = 0; i < productList.size(); i++) {
+            if (productList.get(i).getId().equals(product.getId())) {
+                productList.set(i, product);
+                return product;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void deleteProduct(Long id) {
+        productList.removeIf(product -> product.getId().equals(id));
+    }
 }
