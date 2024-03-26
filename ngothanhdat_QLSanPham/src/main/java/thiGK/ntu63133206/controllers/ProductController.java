@@ -1,5 +1,4 @@
 package thiGK.ntu63133206.controllers;
-
 import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,13 +36,19 @@ public class ProductController {
         return "products/index";
     }
 
+    @GetMapping("/add")
+    public String addProductForm(Model model) {
+        model.addAttribute("product", new Product());
+        return "products/add_product";
+    }
+
     @PostMapping("/add")
     public String addProduct(@ModelAttribute Product product, @RequestParam("productImage") MultipartFile file, RedirectAttributes redirectAttributes) {
-        try {
-            String imageUrl = imageStorageService.saveImage(file);
+    	try {
+            String imageUrl = file.isEmpty() ? "default-product.jpg" : imageStorageService.saveImage(file);
             product.setImageUrl(imageUrl);
             productService.addProduct(product);
-            return "redirect:/products/index";
+            return "redirect:/products";
         } catch (IOException e) {
             redirectAttributes.addFlashAttribute("message", "Failed to upload image: " + e.getMessage());
             return "redirect:/products/add";
@@ -58,9 +63,16 @@ public class ProductController {
     }
 
     @PostMapping("/edit/{id}")
-    public String editProduct(@PathVariable Long id, @ModelAttribute Product product) {
-        productService.updateProduct(product);
-        return "redirect:/products/index";
+    public String editProduct(@PathVariable Long id, @ModelAttribute Product product, @RequestParam("productImage") MultipartFile file, RedirectAttributes redirectAttributes) {
+    	try {
+            String imageUrl = file.isEmpty() ? product.getImageUrl() : imageStorageService.saveImage(file);
+            product.setImageUrl(imageUrl);
+            productService.updateProduct(product);
+            return "redirect:/products";
+        } catch (IOException e) {
+            redirectAttributes.addFlashAttribute("message", "Failed to upload image: " + e.getMessage());
+            return "redirect:/products/edit/" + id;
+        }
     }
 
     @GetMapping("/delete/{id}")

@@ -10,15 +10,15 @@
 <body>
     <div class="container mt-5">
         <h2>Edit Product</h2>
-        <form action="/products/edit/{productId}" method="post">
-            <input type="hidden" name="productId" value="{productId}">
+    <form action="/products/edit/{id}" method="post" enctype="multipart/form-data" th:object="${product}">
+            <input type="hidden" name="productId" th:value="${product.id}">
             <div class="mb-3">
                 <label for="productName" class="form-label">Product Name</label>
-                <input type="text" class="form-control" id="productName" name="productName" value="{productName}" required>
+                <input type="text" class="form-control" id="productName" name="productName" th:value="${product.productName}" required>
             </div>
             <div class="mb-3">
                 <label for="productPrice" class="form-label">Product Price</label>
-                <input type="number" class="form-control" id="productPrice" name="productPrice" value="{productPrice}" required>
+                <input type="number" class="form-control" id="productPrice" name="productPrice" th:value="${product.productPrice}" required>
             </div>
             <div class="mb-3">
                 <label class="form-label">Product Image</label>
@@ -43,7 +43,7 @@
             </div>
             <div class="mb-3">
                 <label class="form-label">Current Image</label><br>
-                <img src="{currentImageUrl}" alt="Current Product Image" style="max-width: 200px;">
+                <img src="/images/${product.imageUrl}" alt="Current Product Image" style="max-width: 500px;">
             </div>
             <button type="submit" class="btn btn-primary">Save Changes</button>
         </form>
