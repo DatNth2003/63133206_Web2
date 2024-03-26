@@ -20,8 +20,52 @@
                 <label for="productPrice" class="form-label">Product Price</label>
                 <input type="number" class="form-control" id="productPrice" name="productPrice" value="{productPrice}" required>
             </div>
+            <div class="mb-3">
+                <label class="form-label">Product Image</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="imageOption" id="uploadImage" value="upload" checked>
+                    <label class="form-check-label" for="uploadImage">
+                        Upload Image
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="imageOption" id="imageUrl" value="url">
+                    <label class="form-check-label" for="imageUrl">
+                        Image URL
+                    </label>
+                </div>
+            </div>
+            <div class="mb-3" id="imageUpload">
+                <input type="file" class="form-control" id="productImage" name="productImage">
+            </div>
+            <div class="mb-3" id="imageUrlInput" style="display: none;">
+                <input type="text" class="form-control" id="productImageUrl" name="productImageUrl" placeholder="Enter Image URL">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Current Image</label><br>
+                <img src="{currentImageUrl}" alt="Current Product Image" style="max-width: 200px;">
+            </div>
             <button type="submit" class="btn btn-primary">Save Changes</button>
         </form>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadImage = document.getElementById('uploadImage');
+            const imageUrl = document.getElementById('imageUrl');
+            const imageUpload = document.getElementById('imageUpload');
+            const imageUrlInput = document.getElementById('imageUrlInput');
+
+            uploadImage.addEventListener('change', function() {
+                imageUpload.style.display = 'block';
+                imageUrlInput.style.display = 'none';
+            });
+
+            imageUrl.addEventListener('change', function() {
+                imageUrlInput.style.display = 'block';
+                imageUpload.style.display = 'none';
+            });
+        });
+    </script>
 </body>
 </html>

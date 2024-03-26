@@ -10,7 +10,7 @@
 <body>
     <div class="container mt-5">
         <h2>Add Product</h2>
-        <form action="/products/add" method="post">
+        <form action="/products/add" method="post" enctype="multipart/form-data">
             <div class="mb-3">
                 <label for="productName" class="form-label">Product Name</label>
                 <input type="text" class="form-control" id="productName" name="productName" required>

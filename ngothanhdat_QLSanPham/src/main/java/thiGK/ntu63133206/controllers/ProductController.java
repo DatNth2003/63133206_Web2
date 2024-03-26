@@ -1,5 +1,7 @@
 package thiGK.ntu63133206.controllers;
 
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -7,8 +9,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import thiGK.ntu63133206.models.Product;
+import thiGK.ntu63133206.services.ImageStorageService;
 import thiGK.ntu63133206.services.ProductService;
 
 @Controller
@@ -16,10 +21,12 @@ import thiGK.ntu63133206.services.ProductService;
 public class ProductController {
 
     private final ProductService productService;
+    private final ImageStorageService imageStorageService;
 
     @Autowired
-    public ProductController(ProductService productService) {
+    public ProductController(ProductService productService, ImageStorageService imageStorageService) {
         this.productService = productService;
+        this.imageStorageService = imageStorageService;
     }
 
     @GetMapping(value = {"/index", ""})
@@ -30,16 +37,17 @@ public class ProductController {
         return "products/index";
     }
 
-    @GetMapping("/add")
-    public String addProductForm(Model model) {
-        model.addAttribute("product", new Product());
-        return "products/add_product";
-    }
-
     @PostMapping("/add")
-    public String addProduct(@ModelAttribute Product product) {
-        productService.addProduct(product);
-        return "redirect:/products/index";
+    public String addProduct(@ModelAttribute Product product, @RequestParam("productImage") MultipartFile file, RedirectAttributes redirectAttributes) {
+        try {
+            String imageUrl = imageStorageService.saveImage(file);
+            product.setImageUrl(imageUrl);
+            productService.addProduct(product);
+            return "redirect:/products/index";
+        } catch (IOException e) {
+            redirectAttributes.addFlashAttribute("message", "Failed to upload image: " + e.getMessage());
+            return "redirect:/products/add";
+        }
     }
 
     @GetMapping("/edit/{id}")
