@@ -8,12 +8,14 @@
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
+
 <body>
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
             <a class="navbar-brand" href="#">Product Management</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
@@ -33,23 +35,20 @@
     </nav>
 
     <!-- Carousel -->
-    <div id="carouselExampleControls" class="carousel slide" data-bs-ride="carousel">
+    <div id="carouselNTU" class="carousel slide" data-bs-ride="carousel">
         <div class="carousel-inner">
             <div class="carousel-item active">
-                <img src="https://via.placeholder.com/150" class="d-block w-100" alt="...">
+                <img src="https://elearning.ntu.edu.vn/pluginfile.php/2/course/section/13/5.png?time=1710765798564" class="d-block w-100" style="height: 200px;" alt="...">
             </div>
             <div class="carousel-item">
-                <img src="https://via.placeholder.com/150" class="d-block w-100" alt="...">
-            </div>
-            <div class="carousel-item">
-                <img src="https://via.placeholder.com/150" class="d-block w-100" alt="...">
+                <img src="https://via.placeholder.com/150" class="d-block w-100" style="height: 200px;" alt="...">
             </div>
         </div>
-        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselNTU" data-bs-slide="prev">
             <span class="carousel-control-prev-icon" aria-hidden="true"></span>
             <span class="visually-hidden">Previous</span>
         </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="next">
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselNTU" data-bs-slide="next">
             <span class="carousel-control-next-icon" aria-hidden="true"></span>
             <span class="visually-hidden">Next</span>
         </button>
@@ -60,18 +59,49 @@
         <div class="row">
             <div th:each="product : ${productPage.content}" class="col-md-4">
                 <div class="card mb-4 shadow-sm">
-                    <img th:src="@{${'images/' + product.imageUrl}}" class="bd-placeholder-img card-img-top" width="100%" height="225" xmlns:th="http://www.thymeleaf.org" alt="Product Image">
+                    <img th:src="@{'/images/' + ${product.imageUrl}}" class="bd-placeholder-img card-img-top"
+     				width="100%" height="250px" alt="Product Image">
                     <div class="card-body">
                         <h5 class="card-title" th:text="${product.name}">Product Name</h5>
                         <p class="card-text" th:text="'$' + ${product.price}">Product Price</p>
                         <div class="d-flex justify-content-between align-items-center">
                             <div class="btn-group">
-                                <a th:href="@{'/products/edit/' + ${product.id}}" class="btn btn-sm btn-outline-secondary">Edit</a>
-                                <a th:href="@{'/products/delete/' + ${product.id}}" class="btn btn-sm btn-outline-secondary">Delete</a>
+                                <a th:href="@{'/products/edit/' + ${product.id}}"
+                                    class="btn btn-sm btn-outline-secondary">Edit</a>
+                                <a th:href="@{'/products/delete/' + ${product.id}}"
+                                    class="btn btn-sm btn-outline-secondary">Delete</a>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item" th:classappend="${productPage.first} ? 'disabled'">
+                            <a class="page-link" th:href="@{/products/index?page=0}">First</a>
+                        </li>
+                        <li class="page-item" th:classappend="${productPage.first} ? 'disabled'">
+                            <a class="page-link" th:href="@{/products/index?page=${productPage.number - 1}}">Previous</a>
+                        </li>
+                        <li class="page-item" th:each="page : ${#numbers.sequence(0, productPage.totalPages - 1)}"
+                            th:classappend="${page == productPage.number} ? 'active'">
+                            <a class="page-link" th:href="@{/products/index?page=${page}}" th:text="${page + 1}"></a>
+                        </li>
+                        <li class="page-item" th:classappend="${productPage.last} ? 'disabled'">
+                            <a class="page-link" th:href="@{/products/index?page=${productPage.number + 1}}">Next</a>
+                        </li>
+                        <li class="page-item" th:classappend="${productPage.last} ? 'disabled'">
+                            <a class="page-link" th:href="@{/products/index?page=${productPage.totalPages - 1}}">Last</a>
+                        </li>
+                    </ul>
+                </nav>
             </div>
         </div>
     </div>

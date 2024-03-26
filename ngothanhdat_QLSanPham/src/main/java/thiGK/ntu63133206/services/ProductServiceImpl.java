@@ -17,7 +17,7 @@ public class ProductServiceImpl implements ProductService {
     private static List<Product> productList = new ArrayList<>();
 
     static {
-        productList.add(new Product(1L, "Bút", "p-but.jpg", 10000));
+        productList.add(new Product(1L, "Bút", "p-but-may.jpg", 10000));
         productList.add(new Product(2L, "Gôm", "p-gom.jpg", 2000));
         productList.add(new Product(3L, "Thước sắt", "p-thuoc-sat.jpg", 150000));
     }
