@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
 import thiGK.ntu63133206.models.Product;
 import thiGK.ntu63133206.services.ProductService;
 
@@ -24,7 +25,7 @@ public class ProductController {
     @GetMapping("/index")
     public String index(Model model, @RequestParam(defaultValue = "0") int page) {
         Pageable pageable = PageRequest.of(page, 6);
-        Page<thiGK.ntu63133206.model.Product> productPage = productService.findPaginated(pageable);
+        Page<thiGK.ntu63133206.models.Product> productPage = productService.findPaginated(pageable);
         model.addAttribute("productPage", productPage);
         return "index";
     }

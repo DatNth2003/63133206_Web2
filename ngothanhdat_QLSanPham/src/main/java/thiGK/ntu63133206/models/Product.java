@@ -1,4 +1,4 @@
-package thiGK.ntu63133206.model;
+package thiGK.ntu63133206.models;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

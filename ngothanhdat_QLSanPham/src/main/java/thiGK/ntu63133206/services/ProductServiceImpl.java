@@ -6,7 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import thiGK.ntu63133206.model.Product;
+import thiGK.ntu63133206.models.Product;
 
 import java.util.ArrayList;
 import java.util.Collections;
