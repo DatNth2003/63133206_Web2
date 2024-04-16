@@ -7,6 +7,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import com.ntd63133206.bookbuddy.model.User;
+import com.ntd63133206.bookbuddy.repository.UserRepository;
+
 public class AuthController {
 	@Autowired
     private UserRepository userRepository;
