@@ -1,41 +1,51 @@
 package com.ntd63133206.bookbuddy.service;
 
-import java.util.List;
+import java.io.IOException;
 
-import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.ntd63133206.bookbuddy.model.Book;
+import com.ntd63133206.bookbuddy.model.Tag;
 import com.ntd63133206.bookbuddy.repository.BookRepository;
 
 @Service
 public class BookService {
-	@Autowired
+
+    @Autowired
     private BookRepository bookRepository;
 
-    public List<Book> getAllBooks() {
-        return bookRepository.findAll();
+    public Page<Book> getAllBooks(Pageable pageable) {
+        return bookRepository.findAll(pageable);
+    }
+
+    public Page<Book> findByAuthor(String author, Pageable pageable) {
+        return bookRepository.findByAuthorContaining(author, pageable);
     }
 
     public Book getBookById(Long id) {
-        Optional<Book> optionalBook = bookRepository.findById(id);
-        return optionalBook.orElse(null);
+        return bookRepository.findById(id).orElse(null);
     }
 
-    public Book createBook(Book book) {
+    public Book addBook(Book book, MultipartFile coverImage) throws IOException {
+        if (coverImage != null && !coverImage.isEmpty()) {
+            byte[] imageData = coverImage.getBytes();
+            book.setCoverImage(imageData);
+        }
         return bookRepository.save(book);
     }
 
+
     public Book updateBook(Long id, Book updatedBook) {
-        Book existingBook = getBookById(id);
-        if (existingBook != null) {
-            existingBook.setTitle(updatedBook.getTitle());
-            existingBook.setAuthor(updatedBook.getAuthor());
-            // Cập nhật các trường khác của sách nếu cần
-            return bookRepository.save(existingBook);
-        }
-        return null;
+        return bookRepository.findById(id).map(book -> {
+            book.setTitle(updatedBook.getTitle());
+            book.setAuthor(updatedBook.getAuthor());
+            book.setPrice(updatedBook.getPrice());
+            return bookRepository.save(book);
+        }).orElse(null);
     }
 
     public void deleteBook(Long id) {
@@ -43,18 +53,16 @@ public class BookService {
     }
 
     public void addTagToBook(Long bookId, Tag tag) {
-        Book book = getBookById(bookId);
-        if (book != null) {
+        bookRepository.findById(bookId).ifPresent(book -> {
             book.getTags().add(tag);
             bookRepository.save(book);
-        }
+        });
     }
 
     public void removeTagFromBook(Long bookId, Tag tag) {
-        Book book = getBookById(bookId);
-        if (book != null) {
+        bookRepository.findById(bookId).ifPresent(book -> {
             book.getTags().remove(tag);
             bookRepository.save(book);
-        }
+        });
     }
 }

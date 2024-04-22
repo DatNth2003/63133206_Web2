@@ -1,31 +1,64 @@
 package com.ntd63133206.bookbuddy.controller;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.ntd63133206.bookbuddy.model.Book;
 import com.ntd63133206.bookbuddy.service.BookService;
 
-@RestController
+import java.io.IOException;
+
+@Controller
 @RequestMapping("/api/books")
 public class BookController {
+
     @Autowired
     private BookService bookService;
 
-    @PostMapping
-    public Book createBook(@RequestBody Book book) {
-        return bookService.createBook(book);
+    @GetMapping("/add-book")
+    public String showAddBookForm() {
+        return "add-book";
+    }
+    
+    @PostMapping("/add-book")
+    public String addBook(@ModelAttribute Book book, @RequestParam("coverImageFile") MultipartFile coverImage) {
+        try {
+            // Gọi phương thức addBook trong BookService để lưu thông tin sách và ảnh bìa
+            bookService.addBook(book, coverImage);
+            return "redirect:/api/books/add-book?success"; // Chuyển hướng đến trang thêm sách với thông báo thành công
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "redirect:/api/books/add-book?error"; // Chuyển hướng đến trang thêm sách với thông báo lỗi
+        }
     }
 
     @GetMapping
-    public List<Book> getAllBooks() {
-        return bookService.getAllBooks();
+    public ResponseEntity<Page<Book>> getAllBooks(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String author) {
+        try {
+            Pageable paging = PageRequest.of(page, size);
+            Page<Book> books;
+            if (author != null) {
+                books = bookService.findByAuthor(author, paging);
+            } else {
+                books = bookService.getAllBooks(paging);
+            }
+            return ResponseEntity.ok().body(books); // Sử dụng ResponseEntity.ok() để trả về HTTP status 200 OK và set body là danh sách sách
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // Trả về HTTP status 500 INTERNAL_SERVER_ERROR nếu có lỗi
+        }
     }
-
 }
