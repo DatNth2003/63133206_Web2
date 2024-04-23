@@ -10,6 +10,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "tags")
@@ -19,12 +22,14 @@ public class Tag {
     private Long id;
 
     @Column(name = "name")
+    @NotNull
+    @NotBlank
+    @Size(min = 1, max = 255)
     private String name;
 
     @ManyToMany(mappedBy = "tags")
     private Set<Book> books = new HashSet<>();
 
-    // No-argument constructor
     public Tag() {
     }
 

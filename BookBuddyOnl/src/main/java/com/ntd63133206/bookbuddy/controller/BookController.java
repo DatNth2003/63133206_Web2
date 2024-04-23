@@ -34,12 +34,11 @@ public class BookController {
     @PostMapping("/add-book")
     public String addBook(@ModelAttribute Book book, @RequestParam("coverImageFile") MultipartFile coverImage) {
         try {
-            // Gọi phương thức addBook trong BookService để lưu thông tin sách và ảnh bìa
             bookService.addBook(book, coverImage);
-            return "redirect:/api/books/add-book?success"; // Chuyển hướng đến trang thêm sách với thông báo thành công
+            return "redirect:/api/books/add-book?success";
         } catch (IOException e) {
             e.printStackTrace();
-            return "redirect:/api/books/add-book?error"; // Chuyển hướng đến trang thêm sách với thông báo lỗi
+            return "redirect:/api/books/add-book?error"; 
         }
     }
 
