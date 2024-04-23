@@ -20,25 +20,25 @@ import com.ntd63133206.bookbuddy.service.BookService;
 import java.io.IOException;
 
 @Controller
-@RequestMapping("/api/books")
+@RequestMapping("/books")
 public class BookController {
 
     @Autowired
     private BookService bookService;
 
     @GetMapping("/add-book")
-    public String showAddBookForm() {
-        return "add-book";
+    public String showAddBookForm(@ModelAttribute Book book) {
+        return "books/add-book";
     }
     
     @PostMapping("/add-book")
     public String addBook(@ModelAttribute Book book, @RequestParam("coverImageFile") MultipartFile coverImage) {
         try {
             bookService.addBook(book, coverImage);
-            return "redirect:/api/books/add-book?success";
+            return "redirect:/books/add-book?success";
         } catch (IOException e) {
             e.printStackTrace();
-            return "redirect:/api/books/add-book?error"; 
+            return "redirect:/books/add-book?error"; 
         }
     }
 

@@ -1,0 +1,26 @@
+Bảng book:
+id: PK, bigint, auto_increment
+title: varchar(255)
+author: varchar(255)
+price: double
+description: text
+cover_image: blob
+Bảng review:
+id: PK, bigint, auto_increment
+book_id: FK, bigint, not null
+user_id: FK, bigint, not null
+rating: int, not null
+comment: text, not null
+Bảng tag:
+id: PK, bigint, auto_increment
+name: varchar(255), not null
+Bảng book_tags: (Liên kết nhiều-nhiều giữa book và tag)
+book_id: FK, bigint, not null
+tag_id: FK, bigint, not null
+Bảng users:
+id: PK, bigint, auto_increment
+email: varchar(255), not null
+username: varchar(255), not null
+password: varchar(255), not null
+role: varchar(255), not null
+enabled: boolean, not null

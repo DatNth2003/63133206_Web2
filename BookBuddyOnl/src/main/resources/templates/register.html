@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -27,26 +27,26 @@
 <body>
     <div class="container mt-5">
         <h2>Register</h2>
-        <form action="#" method="post">
+        <form action="#" method="post" th:action="@{/userRegister}">
             <div class="mb-3">
                 <label for="email" class="form-label">Email:</label>
-                <input type="text" id="email" name="email" class="form-control" />
+                <input type="email" id="email" name="email" class="form-control" required/>
             </div>
             <div class="mb-3 password-toggle">
                 <label for="password" class="form-label">Password:</label>
-                <input type="password" id="password" name="password" class="form-control" />
+                <input type="password" id="password" name="password" class="form-control" required/>
                 <span class="toggle-password" onclick="togglePasswordVisibility(this)">
                     <img src="https://img.icons8.com/material-rounded/24/000000/visible--v1.png" alt="Show/Hide Password">
                 </span>
             </div>
             <div class="mb-3">
                 <label for="confirmPassword" class="form-label">Confirm Password:</label>
-                <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" />
+                <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" required/>
             </div>
-            <button type="button" onclick="validatePasswords()" class="btn btn-primary">Register</button>
+            <button type="submit" class="btn btn-primary">Register</button>
         </form>
-        <p th:if="${error}" th:text="${error}" class="text-danger mt-3"></p>
-        <p th:if="${success}" th:text="${success}" class="text-success mt-3"></p>
+        <p th:if="${error}" class="text-danger mt-3" th:text="${error}"></p>
+        <p th:if="${success}" class="text-success mt-3" th:text="${success}"></p>
         <a href="/" class="btn btn-secondary mt-3">Go to Login</a>
     </div>
 
@@ -62,22 +62,6 @@
             } else {
                 passwordInput.type = "password";
                 element.innerHTML = '<img src="https://img.icons8.com/material-rounded/24/000000/visible--v1.png" alt="Show Password">';
-            }
-        }
-
-        function validatePasswords() {
-            var password = document.getElementById("password").value;
-            var confirmPassword = document.getElementById("confirmPassword").value;
-            var errorParagraph = document.querySelector(".text-danger");
-            var successParagraph = document.querySelector(".text-success");
-            
-            if (password !== confirmPassword) {
-                errorParagraph.textContent = "Passwords do not match!";
-                successParagraph.textContent = "";
-            } else {
-                errorParagraph.textContent = "";
-                successParagraph.textContent = "Registration successful! Please log in.";
-                document.querySelector("form").submit();
             }
         }
     </script>

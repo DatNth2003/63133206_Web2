@@ -27,15 +27,22 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+//        http.authorizeRequests()
+//            .requestMatchers("/edit/**", "/delete/**").hasRole("ADMIN")
+//            .anyRequest().authenticated()
+//            .and()
+//            .formLogin().permitAll()
+//            .and()
+//            .logout().permitAll()
+//            .and()
+//            .exceptionHandling().accessDeniedPage("/403");
+//        return http.build();
         http.authorizeRequests()
-            .requestMatchers("/edit/**", "/delete/**").hasRole("ADMIN")
-            .anyRequest().authenticated()
-            .and()
-            .formLogin().permitAll()
-            .and()
-            .logout().permitAll()
-            .and()
-            .exceptionHandling().accessDeniedPage("/403");
+        	.requestMatchers("/**").permitAll() // Cho phép truy cập tất cả các URL mà không cần xác thực
+        	.and()
+        	.formLogin().permitAll() // Cho phép truy cập trang đăng nhập
+        	.and()
+        	.logout().permitAll(); // Cho phép truy cập trang đăng xuất
         return http.build();
     }
 }
