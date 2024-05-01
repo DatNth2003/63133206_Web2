@@ -1,13 +1,21 @@
 package com.ntd63133206.bookbuddy.model;
 
+import java.sql.Timestamp;
+import java.util.Set;
+
+import org.springframework.web.multipart.MultipartFile;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -18,7 +26,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @Entity
-@Table(name = "user")
+@Table(name = "users")
 public class User {
 
 	@Id
@@ -37,14 +45,26 @@ public class User {
     @Column(name = "password")
     @NotBlank(message = "Mật khẩu không được để trống")
     private String password;
+    @Transient
+    private String passwordConfirm;
     
     @Column(name = "role")
-    @NotBlank(message = "Vai trò không được để trống")
     private String role;
-    
-    private boolean enabled;
 
-    public Long getId() {
+    
+    @Column(name = "enabled")
+    private boolean enabled;
+    
+    @Column(name = "reset_token")
+    private String resetToken;
+
+    @Column(name = "avatar")
+    private String avatar;
+
+    @Column(name = "last_login")
+    private Timestamp lastLogin;
+
+	public Long getId() {
         return id;
     }
 
@@ -68,14 +88,36 @@ public class User {
         this.username = username;
     }
 
-    public String getPassword() {
+    public String getAvatar() {
+		return avatar;
+	}
+
+	public void setAvatar(String avatar) {
+		this.avatar = avatar;
+	}
+
+	public Timestamp getLastLogin() {
+		return lastLogin;
+	}
+
+	public void setLastLogin(Timestamp lastLogin) {
+		this.lastLogin = lastLogin;
+	}
+
+	public String getPassword() {
         return password;
     }
 
     public void setPassword(String password) {
         this.password = password;
     }
+    public String getPasswordConfirm() {
+        return passwordConfirm;
+    }
 
+    public void setPasswordConfirm(String passwordConfirm) {
+        this.passwordConfirm = passwordConfirm;
+    }
     public String getRole() {
         return role;
     }
@@ -91,4 +133,16 @@ public class User {
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
+
+	public String getResetToken() {
+		return resetToken;
+	}
+
+	public void setResetToken(String resetToken) {
+		this.resetToken = resetToken;
+	}
+
+
+
+    
 }

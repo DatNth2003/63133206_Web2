@@ -1,21 +1,24 @@
 package com.ntd63133206.bookbuddy.model;
 
+import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.Set;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "book")
+@Table(name = "books")
 public class Book {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,25 +26,42 @@ public class Book {
     @Column(name = "title")
     private String title;
 
-    @Column(name = "author")
-    private String author;
-    
     @Column(name = "price")
     private double price;
-    
-    @Lob
-    @Column(name = "description", length = 1000) // Độ dài tối đa cho mô tả là 1000 ký tự
-    private String description;
 
     @Lob
-    @Column(name = "cover_image") // Lưu trữ ảnh bìa dưới dạng dữ liệu nhị phân
+    @Column(name = "description", length = 1000)
+    private String description;
+    
+    @Column(name = "updated_at")
+    private Timestamp updatedAt;
+
+    @Lob
+    @Column(name = "cover_image", columnDefinition = "BLOB")
     private byte[] coverImage;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany
+    @JoinTable(name = "book_tag",
+            joinColumns = @JoinColumn(name = "book_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id"))
     private Set<Tag> tags = new HashSet<>();
 
-    // No-argument constructor
+    @ManyToMany
+    @JoinTable(name = "book_author",
+            joinColumns = @JoinColumn(name = "book_id"),
+            inverseJoinColumns = @JoinColumn(name = "author_id"))
+    private Set<Author> authors = new HashSet<>();
+
+    
     public Book() {
+        // Default constructor
+    }
+
+    public Book(String title, double price, String description, byte[] coverImage) {
+        this.title = title;
+        this.price = price;
+        this.description = description;
+        this.coverImage = coverImage;
     }
 
     public Long getId() {
@@ -58,14 +78,6 @@ public class Book {
 
     public void setTitle(String title) {
         this.title = title;
-    }
-
-    public String getAuthor() {
-        return author;
-    }
-
-    public void setAuthor(String author) {
-        this.author = author;
     }
 
     public double getPrice() {
@@ -100,13 +112,19 @@ public class Book {
         this.tags = tags;
     }
 
-    public void addTag(Tag tag) {
-        this.tags.add(tag);
-        tag.getBooks().add(this);
+    public Set<Author> getAuthors() {
+        return authors;
     }
 
-    public void removeTag(Tag tag) {
-        this.tags.remove(tag);
-        tag.getBooks().remove(this);
+    public void setAuthors(Set<Author> authors) {
+        this.authors = authors;
+    }
+
+    public Timestamp getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Timestamp updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

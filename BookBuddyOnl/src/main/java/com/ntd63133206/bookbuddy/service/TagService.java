@@ -18,23 +18,21 @@ public class TagService {
         return tagRepository.findAll();
     }
 
+    public void addTag(Tag tag) {
+        tagRepository.save(tag);
+    }
+
     public Tag getTagById(Long id) {
-        Optional<Tag> optionalTag = tagRepository.findById(id);
-        return optionalTag.orElse(null);
+        Optional<Tag> result = tagRepository.findById(id);
+        return result.orElse(null);
     }
 
-    public Tag createTag(Tag tag) {
-        return tagRepository.save(tag);
-    }
-
-    public Tag updateTag(Long id, Tag updatedTag) {
+    public void updateTag(Long id, Tag tag) {
         Tag existingTag = getTagById(id);
         if (existingTag != null) {
-            existingTag.setName(updatedTag.getName());
-            // Cập nhật các trường khác của tag nếu cần
-            return tagRepository.save(existingTag);
+            existingTag.setName(tag.getName());
+            tagRepository.save(existingTag);
         }
-        return null;
     }
 
     public void deleteTag(Long id) {

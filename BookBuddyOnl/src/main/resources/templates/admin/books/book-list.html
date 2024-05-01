@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Catalog</title>
+    <!-- Thêm CSS của Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+<div class="container mt-4">
+    <!-- Form Tìm Kiếm và Filter -->
+    <div class="mb-3">
+        <input type="text" id="author" class="form-control" placeholder="Enter author name">
+        <button class="btn btn-primary" onclick="searchByAuthor()">Search</button>
+    </div>
+
+    <div class="mb-3">
+        <select id="sortOption" class="form-select">
+            <option value="title">Sort by Title</option>
+            <option value="price">Sort by Price</option>
+        </select>
+        <button class="btn btn-primary" onclick="sortBy()">Sort</button>
+    </div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Price</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="bookTable">
+            <!-- Loop through books and display each book -->
+            <tr th:each="book : ${books}">
+                <td th:text="${book.title}">Title</td>
+                <td th:text="${book.authors}">Author</td>
+                <td th:text="${book.price}">Price</td>
+                <td>
+                    <a th:href="@{'/books/edit-book/' + ${book.id}}" class="btn btn-info">Edit</a>
+					<button class="btn btn-danger" onclick="deleteBook('${book.id}')">Delete</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="text-center">
+        <a href="/books/add-book" class="btn btn-success">Add Book</a>
+    </div>
+
+    <!-- Phân Trang -->
+    <nav aria-label="Page navigation">
+        <ul class="pagination">
+            <li class="page-item"><a class="page-link" href="#" onclick="goToPage(0)">First</a></li>
+            <li class="page-item"><a class="page-link" href="#" onclick="goToPage(prevPage)">Previous</a></li>
+            <li class="page-item"><a class="page-link" href="#" onclick="goToPage(nextPage)">Next</a></li>
+            <li class="page-item"><a class="page-link" href="#" onclick="goToPage(lastPage)">Last</a></li>
+        </ul>
+    </nav>
+</div>
+
+<!-- Thêm JavaScript của Bootstrap 5 và jQuery -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+<script th:inline="javascript">
+    var currentPage = 0;
+    var prevPage = currentPage - 1;
+    var nextPage = currentPage + 1;
+    var lastPage = totalPages - 1;
+
+    function searchByAuthor() {
+        var author = $("#author").val();
+        $.get("/books?author=" + author, function(data) {
+            $("#bookTable").html(data);
+        });
+    }
+
+    function sortBy() {
+        var sortOption = $("#sortOption").val();
+        $.get("/books?page=" + currentPage + "&sort=" + sortOption, function(data) {
+            $("#bookTable").html(data);
+        });
+    }
+
+    function goToPage(page) {
+        currentPage = page;
+        $.get("/books?page=" + currentPage, function(data) {
+            $("#bookTable").html(data);
+        });
+    }
+
+    function redirectToEditPage(bookId) {
+        window.location.href = "/edit-book?id=" + bookId;
+    }
+
+    function deleteBook(bookId) {
+        // Implement delete functionality here
+        // You can send an AJAX request to delete the book
+        // After successful deletion, you can refresh the page or update the book list
+        console.log("Deleting book with ID: " + bookId);
+    }
+</script>
+
+</body>
+</html>

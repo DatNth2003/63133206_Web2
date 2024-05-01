@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register</title>
+    <link href="/bootstrap-5.2.3-dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Custom CSS -->
+    <style>
+        .container-custom {
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 50px;
+        }
+        .avatar-preview {
+            width: 100px;
+            height: 100px;
+            margin-top: 10px;
+        }
+        .img-thumbnail {
+            width: 100px;
+            height: 100px;
+        }
+        .validation-message {
+            margin-top: 5px;
+        }
+        .validation-message span {
+            margin-left: 5px;
+        }
+        .success {
+            color: green;
+        }
+        /* Thêm CSS cho màu chữ của quy tắc mật khẩu */
+        .validation-message span.text-danger {
+            color: red;
+        }
+        .validation-message span.text-success {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+<div class="container container-custom">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <h2 class="mb-4">Register</h2>
+            <form action="#" th:action="@{/account/register}" method="post" enctype="multipart/form-data">
+                <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+                <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+                
+                <div class="mb-3 row align-items-center">
+                    <div class="col-auto">
+                        <label for="avatar" class="form-label">Avatar:</label>
+                        <input type="file" class="form-control" id="avatar" name="avatarFile" accept="image/*" onchange="previewAvatar(this)">
+                    </div>
+                    <div class="col-auto">
+                        <img id="avatarPreview" class="avatar-preview img-thumbnail" alt="Avatar Preview" src="/images/default/default-avatar.jpg">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email:</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                    <small id="emailHelp" class="form-text text-muted validation-message">
+                        <span id="emailValidityIcon" class="bi bi-x text-danger"></span>
+                        <span id="emailValidityMessage" class="text-danger">Please enter a valid email address.</span>
+                    </small>
+                </div>
+
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username:</label>
+                    <input type="text" class="form-control" id="username" name="username" required>
+                    <small id="usernameHelp" class="form-text text-muted validation-message">
+                        <span id="usernameValidityIcon" class="bi bi-x text-danger"></span>
+                        <span id="usernameValidityMessage" class="text-danger">Username must be between 8 and 50 characters.</span>
+                    </small>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password:</label>
+                    <div class="input-group">
+                        <input type="password" class="form-control" id="password" name="password" required>
+                        <span id="togglePassword" class="input-group-text" style="cursor: pointer;"><i class="bi bi-eye"></i></span>
+                    </div>
+                    <small id="passwordHelp" class="form-text text-muted validation-message">
+    					<span id="charLength" class="bi bi-x text-danger"></span> <span class="text-danger">At least 8 characters</span><br>
+						<span id="upperCase" class="bi bi-x text-danger"></span> <span class="text-danger">At least 1 uppercase letter</span><br>
+						<span id="number" class="bi bi-x text-danger"></span> <span class="text-danger">At least 1 number</span><br>
+						<span id="specialChar" class="bi bi-x text-danger"></span> <span class="text-danger">At least 1 special character.</span><br>
+
+					</small>
+
+                </div>
+                <div class="mb-3">
+                    <label for="confirmPassword" class="form-label">Confirm Password:</label>
+                    <div class="input-group">
+                        <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+                        <span id="toggleConfirmPassword" class="input-group-text" style="cursor: pointer;"><i class="bi bi-eye"></i></span>
+                    </div>
+                    <small id="confirmPasswordHelp" class="form-text text-muted validation-message">
+                        <span id="confirmPasswordValidityIcon" class="bi bi-x text-danger"></span>
+                        <span id="confirmPasswordValidityMessage" class="text-danger">Password must match the above password.</span>
+                    </small>
+                </div>
+                <button type="submit" class="btn btn-primary">Register</button>
+                <a th:href="@{/account/login}" class="btn btn-link">Already have an account? Login</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap Icons (Bi) -->
+<script src="https://unpkg.com/bootstrap-icons@1.7.2/font/bootstrap-icons.js"></script>
+
+<script>
+const togglePassword = document.getElementById('togglePassword');
+const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+const password = document.getElementById('password');
+const confirmPassword = document.getElementById('confirmPassword');
+
+togglePassword.addEventListener('click', function () {
+    const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+    password.setAttribute('type', type);
+    this.querySelector('i').classList.toggle('bi-eye');
+    this.querySelector('i').classList.toggle('bi-eye-slash');
+});
+
+toggleConfirmPassword.addEventListener('click', function () {
+    const type = confirmPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+    confirmPassword.setAttribute('type', type);
+    this.querySelector('i').classList.toggle('bi-eye');
+    this.querySelector('i').classList.toggle('bi-eye-slash');
+});
+
+const emailInput = document.getElementById('email');
+const usernameInput = document.getElementById('username');
+const passwordInput = document.getElementById('password');
+const confirmPasswordInput = document.getElementById('confirmPassword');
+
+emailInput.addEventListener('input', function () {
+    validateEmail(emailInput.value);
+});
+
+usernameInput.addEventListener('input', function () {
+    validateUsername(usernameInput.value);
+});
+
+passwordInput.addEventListener('input', function () {
+    validatePassword(passwordInput.value);
+    validateConfirmPassword();
+});
+
+confirmPasswordInput.addEventListener('input', function () {
+    validateConfirmPassword();
+});
+
+
+
+function validateConfirmPassword() {
+    const password = passwordInput.value;
+    const confirmPassword = confirmPasswordInput.value;
+    const confirmPasswordValidityIcon = document.getElementById('confirmPasswordValidityIcon');
+    const confirmPasswordValidityMessage = document.getElementById('confirmPasswordValidityMessage');
+    if (password === confirmPassword && password !== '') {
+        confirmPasswordValidityIcon.classList.remove('bi-x', 'text-danger');
+        confirmPasswordValidityIcon.classList.add('bi-check', 'text-success');
+        confirmPasswordValidityMessage.textContent = 'Passwords match';
+        confirmPasswordValidityMessage.classList.remove('text-danger');
+        confirmPasswordValidityMessage.classList.add('text-success');
+    } else {
+        confirmPasswordValidityIcon.classList.remove('bi-check', 'text-success');
+        confirmPasswordValidityIcon.classList.add('bi-x', 'text-danger');
+        confirmPasswordValidityMessage.textContent = 'Password must match the above password.';
+        confirmPasswordValidityMessage.classList.add('text-danger');
+        confirmPasswordValidityMessage.classList.remove('text-success');
+    }
+}
+
+function validateEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const isValid = emailRegex.test(email);
+    const emailValidityIcon = document.getElementById('emailValidityIcon');
+    const emailValidityMessage = document.getElementById('emailValidityMessage');
+    if (isValid) {
+        emailValidityIcon.classList.remove('bi-x', 'text-danger');
+        emailValidityIcon.classList.add('bi-check', 'text-success');
+        emailValidityMessage.textContent = 'Valid email';
+        emailValidityMessage.classList.remove('text-danger');
+        emailValidityMessage.classList.add('text-success');
+    } else {
+        emailValidityIcon.classList.remove('bi-check', 'text-success');
+        emailValidityIcon.classList.add('bi-x', 'text-danger');
+        emailValidityMessage.textContent = 'Please enter a valid email address.';
+        emailValidityMessage.classList.add('text-danger');
+        emailValidityMessage.classList.remove('text-success');
+    }
+    return isValid;
+}
+
+function validateUsername(username) {
+    const isValid = username.length >= 8 && username.length <= 50;
+    const usernameValidityIcon = document.getElementById('usernameValidityIcon');
+    const usernameValidityMessage = document.getElementById('usernameValidityMessage');
+    if (isValid) {
+        usernameValidityIcon.classList.remove('bi-x', 'text-danger');
+        usernameValidityIcon.classList.add('bi-check', 'text-success');
+        usernameValidityMessage.textContent = 'Valid username';
+        usernameValidityMessage.classList.remove('text-danger');
+        usernameValidityMessage.classList.add('text-success');
+    } else {
+        usernameValidityIcon.classList.remove('bi-check', 'text-success');
+        usernameValidityIcon.classList.add('bi-x', 'text-danger');
+        usernameValidityMessage.textContent = 'Username must be between 8 and 50 characters.';
+        usernameValidityMessage.classList.add('text-danger');
+        usernameValidityMessage.classList.remove('text-success');
+    }
+    return isValid;
+}
+
+function validatePassword(password) {
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    const isValid = passwordRegex.test(password);
+    const passwordValidityMessage = document.getElementById('passwordHelp');
+
+    passwordValidityMessage.innerHTML = '';
+
+    if (password.length < 8) {
+        passwordValidityMessage.innerHTML += '<span class="bi bi-x text-danger"></span> <span class="text-danger">At least 8 characters</span><br>';
+    } else {
+        passwordValidityMessage.innerHTML += '<span class="bi bi-check text-success"></span> At least 8 characters<br>';
+    }
+
+    if (!/[A-Z]/.test(password)) {
+        passwordValidityMessage.innerHTML += '<span class="bi bi-x text-danger"></span> <span class="text-danger">At least 1 uppercase letter</span><br>';
+    } else {
+        passwordValidityMessage.innerHTML += '<span class="bi bi-check text-success"></span> At least 1 uppercase letter<br>';
+    }
+
+    if (!/\d/.test(password)) {
+        passwordValidityMessage.innerHTML += '<span class="bi bi-x text-danger"></span> <span class="text-danger">At least 1 number</span><br>';
+    } else {
+        passwordValidityMessage.innerHTML += '<span class="bi bi-check text-success"></span> At least 1 number<br>';
+    }
+
+    if (!/[@$!%*?&]/.test(password)) {
+        passwordValidityMessage.innerHTML += '<span class="bi bi-x text-danger"></span> <span class="text-danger">At least 1 special character</span><br>';
+    } else {
+        passwordValidityMessage.innerHTML += '<span class="bi bi-check text-success"></span> At least 1 special character<br>';
+    }
+
+    if (isValid) {
+        passwordValidityIcon.classList.remove('bi-x', 'text-danger');
+        passwordValidityIcon.classList.add('bi-check', 'text-success');
+        passwordValidityMessage.innerHTML += '<span class="bi bi-check text-success"></span> Password meets requirements';
+        passwordValidityMessage.classList.remove('text-danger');
+        passwordValidityMessage.classList.add('text-success');
+    } else {
+        passwordValidityIcon.classList.remove('bi-check', 'text-success');
+        passwordValidityIcon.classList.add('bi-x', 'text-danger');
+        passwordValidityMessage.innerHTML += '<span class="bi bi-x text-danger"></span> Password does not meet requirements';
+        passwordValidityMessage.classList.remove('text-success');
+        passwordValidityMessage.classList.add('text-danger');
+    }
+
+    return isValid;
+}
+
+
+
+
+function previewAvatar(input) {
+    const preview = document.getElementById('avatarPreview');
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            preview.src = e.target.result;
+        }
+        reader.readAsDataURL(input.files[0]);
+    } else {
+        preview.src = "/images/default/default-avatar.jpg";
+    }
+}
+
+</script>
+</body>
+</html>

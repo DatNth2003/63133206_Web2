@@ -1,6 +1,7 @@
 package com.ntd63133206.bookbuddy.service;
 
 import java.io.IOException;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.ntd63133206.bookbuddy.model.Author;
 import com.ntd63133206.bookbuddy.model.Book;
 import com.ntd63133206.bookbuddy.model.Tag;
 import com.ntd63133206.bookbuddy.repository.BookRepository;
@@ -25,7 +27,7 @@ public class BookService {
     }
 
     public Page<Book> findByAuthor(String author, Pageable pageable) {
-        return bookRepository.findByAuthorContaining(author, pageable);
+        return bookRepository.findByAuthorsNameContaining(author, pageable);
     }
 
     public Book getBookById(Long id) {
@@ -40,14 +42,34 @@ public class BookService {
         return bookRepository.save(book);
     }
 
-    public Book updateBook(Long id, Book updatedBook) {
-        return bookRepository.findById(id).map(book -> {
-            book.setTitle(updatedBook.getTitle());
-            book.setAuthor(updatedBook.getAuthor());
-            book.setPrice(updatedBook.getPrice());
-            return bookRepository.save(book);
-        }).orElse(null);
+    public Book editBook(Long id, Book updatedBook, MultipartFile coverImage) throws IOException {
+        Book existingBook = getBookById(id);
+        if (existingBook != null) {
+            existingBook.setTitle(updatedBook.getTitle());
+            existingBook.setPrice(updatedBook.getPrice());
+            existingBook.setDescription(updatedBook.getDescription());
+
+            Set<Author> updatedAuthors = updatedBook.getAuthors();
+            if (updatedAuthors != null && !updatedAuthors.isEmpty()) {
+                existingBook.setAuthors(updatedAuthors);
+            }
+            
+            Set<Tag> updatedTags = updatedBook.getTags();
+            if (updatedTags != null) {
+                existingBook.setTags(updatedTags);
+            }
+
+            if (coverImage != null && !coverImage.isEmpty()) {
+                existingBook.setCoverImage(coverImage.getBytes());
+            }
+
+            return bookRepository.save(existingBook);
+        } else {
+            throw new IllegalArgumentException("Book not found with ID: " + id);
+        }
     }
+
+
 
     public void deleteBook(Long id) {
         bookRepository.deleteById(id);
