@@ -50,7 +50,6 @@
             <span class="bi bi-arrow-right-circle avatar-arrow"></span>
             <img th:src="${session['loggedInUserAvatar']}" class="avatar rounded-circle" alt="Avatar">
         </div>
-        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
         <button type="submit" class="btn btn-primary mt-3">Update Profile</button>
     </form>
 
@@ -72,8 +71,7 @@
 
         reader.onload = function() {
             var dataURL = reader.result;
-            var output = document.getElementById('avatarImage');
-            output.src = dataURL;
+            document.getElementById('avatarPreview').src = dataURL;
         };
 
         reader.readAsDataURL(input.files[0]);

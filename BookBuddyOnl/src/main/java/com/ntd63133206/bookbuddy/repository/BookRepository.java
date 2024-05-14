@@ -9,5 +9,10 @@ import com.ntd63133206.bookbuddy.model.Book;
 
 @Repository
 public interface BookRepository extends JpaRepository<Book, Long> {
-	Page<Book> findByAuthorsNameContaining(String name, Pageable pageable);
+
+    Page<Book> findByTitleContaining(String title, Pageable pageable);
+
+    Page<Book> findByPrice(double price, Pageable pageable);
+
+    Page<Book> findByAuthorsName(String authorName, Pageable pageable);
 }

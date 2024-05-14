@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Register</title>
@@ -12,6 +12,11 @@
             border-radius: 10px;
             padding: 20px;
             margin-top: 50px;
+        }
+        .avatar-container {
+            border: 2px solid #ccc;
+            border-radius: 5px;
+            padding: 3px;
         }
         .avatar-preview {
             width: 100px;
@@ -31,12 +36,19 @@
         .success {
             color: green;
         }
-        /* Thêm CSS cho màu chữ của quy tắc mật khẩu */
         .validation-message span.text-danger {
             color: red;
         }
         .validation-message span.text-success {
             color: green;
+        }
+        /* Added CSS for valid and invalid inputs */
+        .valid-input {
+            border-color: #28a745 !important;
+        }
+
+        .invalid-input {
+            border-color: #dc3545 !important;
         }
     </style>
 </head>
@@ -52,7 +64,7 @@
                 <div class="mb-3 row align-items-center">
                     <div class="col-auto">
                         <label for="avatar" class="form-label">Avatar:</label>
-                        <input type="file" class="form-control" id="avatar" name="avatarFile" accept="image/*" onchange="previewAvatar(this)">
+                        <input type="file" class="form-control" id="avatar" name="avatarFile" accept="image/*" onchange="handleFileInput(this)">
                     </div>
                     <div class="col-auto">
                         <img id="avatarPreview" class="avatar-preview img-thumbnail" alt="Avatar Preview" src="/images/default/default-avatar.jpg">
@@ -82,13 +94,11 @@
                         <span id="togglePassword" class="input-group-text" style="cursor: pointer;"><i class="bi bi-eye"></i></span>
                     </div>
                     <small id="passwordHelp" class="form-text text-muted validation-message">
-    					<span id="charLength" class="bi bi-x text-danger"></span> <span class="text-danger">At least 8 characters</span><br>
-						<span id="upperCase" class="bi bi-x text-danger"></span> <span class="text-danger">At least 1 uppercase letter</span><br>
-						<span id="number" class="bi bi-x text-danger"></span> <span class="text-danger">At least 1 number</span><br>
-						<span id="specialChar" class="bi bi-x text-danger"></span> <span class="text-danger">At least 1 special character.</span><br>
-
-					</small>
-
+                        <span id="charLength" class="bi bi-x text-danger"></span> <span class="text-danger">At least 8 characters</span><br>
+                        <span id="upperCase" class="bi bi-x text-danger"></span> <span class="text-danger">At least 1 uppercase letter</span><br>
+                        <span id="number" class="bi bi-x text-danger"></span> <span class="text-danger">At least 1 number</span><br>
+                        <span id="specialChar" class="bi bi-x text-danger"></span> <span class="text-danger">At least 1 special character.</span><br>
+                    </small>
                 </div>
                 <div class="mb-3">
                     <label for="confirmPassword" class="form-label">Confirm Password:</label>
@@ -166,12 +176,16 @@ function validateConfirmPassword() {
         confirmPasswordValidityMessage.textContent = 'Passwords match';
         confirmPasswordValidityMessage.classList.remove('text-danger');
         confirmPasswordValidityMessage.classList.add('text-success');
+        confirmPasswordInput.classList.remove('invalid-input');
+        confirmPasswordInput.classList.add('valid-input');
     } else {
         confirmPasswordValidityIcon.classList.remove('bi-check', 'text-success');
         confirmPasswordValidityIcon.classList.add('bi-x', 'text-danger');
         confirmPasswordValidityMessage.textContent = 'Password must match the above password.';
         confirmPasswordValidityMessage.classList.add('text-danger');
         confirmPasswordValidityMessage.classList.remove('text-success');
+        confirmPasswordInput.classList.remove('valid-input');
+        confirmPasswordInput.classList.add('invalid-input');
     }
 }
 
@@ -186,12 +200,16 @@ function validateEmail(email) {
         emailValidityMessage.textContent = 'Valid email';
         emailValidityMessage.classList.remove('text-danger');
         emailValidityMessage.classList.add('text-success');
+        emailInput.classList.remove('invalid-input');
+        emailInput.classList.add('valid-input');
     } else {
         emailValidityIcon.classList.remove('bi-check', 'text-success');
         emailValidityIcon.classList.add('bi-x', 'text-danger');
         emailValidityMessage.textContent = 'Please enter a valid email address.';
         emailValidityMessage.classList.add('text-danger');
         emailValidityMessage.classList.remove('text-success');
+        emailInput.classList.remove('valid-input');
+        emailInput.classList.add('invalid-input');
     }
     return isValid;
 }
@@ -206,12 +224,16 @@ function validateUsername(username) {
         usernameValidityMessage.textContent = 'Valid username';
         usernameValidityMessage.classList.remove('text-danger');
         usernameValidityMessage.classList.add('text-success');
+        usernameInput.classList.remove('invalid-input');
+        usernameInput.classList.add('valid-input');
     } else {
         usernameValidityIcon.classList.remove('bi-check', 'text-success');
         usernameValidityIcon.classList.add('bi-x', 'text-danger');
         usernameValidityMessage.textContent = 'Username must be between 8 and 50 characters.';
         usernameValidityMessage.classList.add('text-danger');
         usernameValidityMessage.classList.remove('text-success');
+        usernameInput.classList.remove('valid-input');
+        usernameInput.classList.add('invalid-input');
     }
     return isValid;
 }
@@ -253,30 +275,51 @@ function validatePassword(password) {
         passwordValidityMessage.innerHTML += '<span class="bi bi-check text-success"></span> Password meets requirements';
         passwordValidityMessage.classList.remove('text-danger');
         passwordValidityMessage.classList.add('text-success');
+        passwordInput.classList.remove('invalid-input');
+        passwordInput.classList.add('valid-input');
     } else {
         passwordValidityIcon.classList.remove('bi-check', 'text-success');
         passwordValidityIcon.classList.add('bi-x', 'text-danger');
         passwordValidityMessage.innerHTML += '<span class="bi bi-x text-danger"></span> Password does not meet requirements';
         passwordValidityMessage.classList.remove('text-success');
         passwordValidityMessage.classList.add('text-danger');
+        passwordInput.classList.remove('valid-input');
+        passwordInput.classList.add('invalid-input');
     }
 
     return isValid;
 }
 
-
-
-
-function previewAvatar(input) {
-    const preview = document.getElementById('avatarPreview');
-    if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            preview.src = e.target.result;
+function handleFileInput(input) {
+    var file = input.files[0]; // Lấy tệp từ trường file input
+    var allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+    var isValid = false;
+    
+    if (file) {
+        var extension = file.name.substring(file.name.lastIndexOf('.') + 1).toLowerCase();
+        
+        for (var i = 0; i < allowedExtensions.length; i++) {
+            if (extension === allowedExtensions[i]) {
+                isValid = true;
+                break;
+            }
         }
-        reader.readAsDataURL(input.files[0]);
+    }
+    
+    if (!isValid) {
+        alert('File không hợp lệ. Chỉ chấp nhận các file ảnh có phần mở rộng: jpg, jpeg, png, gif.');
+        input.value = '';
     } else {
-        preview.src = "/images/default/default-avatar.jpg";
+        var preview = document.getElementById('avatarPreview');
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                preview.src = e.target.result;
+            }
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            preview.src = "/images/default/default-avatar.jpg";
+        }
     }
 }
 

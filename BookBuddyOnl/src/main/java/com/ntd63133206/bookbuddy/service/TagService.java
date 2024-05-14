@@ -26,7 +26,13 @@ public class TagService {
         Optional<Tag> result = tagRepository.findById(id);
         return result.orElse(null);
     }
+    public Tag findByName(String name) {
+        return tagRepository.findByName(name);
+    }
 
+    public void save(Tag tag) {
+        tagRepository.save(tag);
+    }
     public void updateTag(Long id, Tag tag) {
         Tag existingTag = getTagById(id);
         if (existingTag != null) {

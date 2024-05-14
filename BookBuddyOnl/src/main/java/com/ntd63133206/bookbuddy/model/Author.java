@@ -21,24 +21,28 @@ public class Author {
 
     @Column(name = "name")
     private String name;
-
-    @Column(name = "email")
-    private String email;
+    
+    @Column(name = "author_image")
+    private String authorImage;
 
     @ManyToMany(mappedBy = "authors")
     private Set<Book> books = new HashSet<>();
-
+    
+    @Column(name = "description", length = 1000)
+    private String description;
     
     public Author() {
         // Default constructor
     }
 
-    public Author(String name, String email) {
-        this.name = name;
-        this.email = email;
-    }
 
-    public Long getId() {
+    public Author(String name, String description) {
+		super();
+		this.name = name;
+		this.description = description;
+	}
+
+	public Long getId() {
         return id;
     }
 
@@ -53,16 +57,24 @@ public class Author {
     public void setName(String name) {
         this.name = name;
     }
-
-    public String getEmail() {
-        return email;
+    
+    public String getAuthorImage() {
+        return authorImage;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setAuthorImage(String authorImage) {
+        this.authorImage = authorImage;
     }
+    
+    public String getDescription() {
+		return description;
+	}
 
-    public Set<Book> getBooks() {
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public Set<Book> getBooks() {
         return books;
     }
 
@@ -79,4 +91,5 @@ public class Author {
         this.books.remove(book);
         book.getAuthors().remove(this);
     }
+    
 }

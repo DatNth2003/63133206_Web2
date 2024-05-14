@@ -27,7 +27,7 @@ public class BookService {
     }
 
     public Page<Book> findByAuthor(String author, Pageable pageable) {
-        return bookRepository.findByAuthorsNameContaining(author, pageable);
+        return bookRepository.findByAuthorsName(author, pageable);
     }
 
     public Book getBookById(Long id) {

@@ -1,17 +1,43 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Navbar</title>
+    <title>BookBuddy</title>
     <!-- Bootstrap CSS -->
-    <link href="/bootstrap-5.2.3-dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.3/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.7.2/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+ 		.navbar-brand {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .navbar-brand span {
+            color: #4285F4;
+        }
+
+        .navbar-brand span:nth-child(2) {
+            color: #DB4437;
+        }        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .nav-link {
+            font-size: 1.2rem;
+        }
+
+        .navbar-text {
+            font-size: 1.2rem;
+        }
+    </style>
 </head>
 <body>
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="#">Navbar</a>
+        <a class="navbar-brand" href="#"><span>Book</span><span>Buddy</span></a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggler"
                 aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -19,17 +45,22 @@
         <div class="collapse navbar-collapse" id="navbarToggler">
             <ul class="navbar-nav me-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="/">Trang chủ</a>
+                    <a class="nav-link" href="/">
+                        <i class="bi bi-house-door"></i> Trang chủ
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/link">Liên kết</a>
+                    <a class="nav-link" href="/link">
+                        <i class="bi bi-link-45deg"></i> Liên kết
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/disabled">Tính năng bị vô hiệu hóa</a>
+                    <a class="nav-link" href="/disabled">
+                        <i class="bi bi-archive"></i> Tính năng bị vô hiệu hóa
+                    </a>
                 </li>
             </ul>
             <ul class="navbar-nav ml-auto">
-                <!-- Kiểm tra xem session có thông tin đăng nhập hay không -->
                 <th:block th:if="${session['loggedInUsername'] != null}">
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button"
@@ -45,7 +76,16 @@
                 </th:block>
                 <th:block th:unless="${session['loggedInUsername'] != null}">
                     <li class="nav-item">
-                        <a class="nav-link" href="account/login">Login</a>
+						<a class="nav-link" href="/account/login">
+                            <i class="bi bi-box-arrow-in-right"></i> Login
+                        </a>
+                    </li>
+                </th:block>
+                <th:block th:if="${#authorization.expression('hasRole(''ROLE_ADMIN'')')}">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin">
+                            <span class="navbar-text"><i class="bi bi-gear"></i> Admin</span>
+                        </a>
                     </li>
                 </th:block>
             </ul>

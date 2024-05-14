@@ -1,6 +1,7 @@
 package com.ntd63133206.bookbuddy.model;
 
 import java.sql.Timestamp;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.web.multipart.MultipartFile;
@@ -12,6 +13,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -27,11 +29,11 @@ import lombok.NoArgsConstructor;
 @Data
 @Entity
 @Table(name = "users")
-public class User {
+public class User{
 
 	@Id
 	@Column(name = "id", unique = true)
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "email", unique = true)
@@ -48,15 +50,17 @@ public class User {
     @Transient
     private String passwordConfirm;
     
-    @Column(name = "role")
-    private String role;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "user_role",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Set<Role> roles = new HashSet<>();
 
-    
     @Column(name = "enabled")
     private boolean enabled;
     
-    @Column(name = "reset_token")
-    private String resetToken;
+    @Column(name = "reset_password_token")
+    private String resetPasswordToken;
 
     @Column(name = "avatar")
     private String avatar;
@@ -118,15 +122,17 @@ public class User {
     public void setPasswordConfirm(String passwordConfirm) {
         this.passwordConfirm = passwordConfirm;
     }
-    public String getRole() {
-        return role;
-    }
+    
 
-    public void setRole(String role) {
-        this.role = role;
-    }
+	public Set<Role> getRoles() {
+		return roles;
+	}
 
-    public boolean isEnabled() {
+	public void setRoles(Set<Role> roles) {
+		this.roles = roles;
+	}
+
+	public boolean isEnabled() {
         return enabled;
     }
 
@@ -134,12 +140,12 @@ public class User {
         this.enabled = enabled;
     }
 
-	public String getResetToken() {
-		return resetToken;
+	public String getResetPasswordToken() {
+		return resetPasswordToken;
 	}
 
-	public void setResetToken(String resetToken) {
-		this.resetToken = resetToken;
+	public void setResetPasswordToken(String resetToken) {
+		this.resetPasswordToken = resetToken;
 	}
 
 

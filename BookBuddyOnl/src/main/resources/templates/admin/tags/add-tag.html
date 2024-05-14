@@ -9,14 +9,19 @@
 <body>
     <div class="container">
         <h1 class="my-4">Add Tag</h1>
-        <form action="/tags/add" method="post">
+        <form action="/admin/tags/add" method="post">
             <div class="mb-3">
                 <label for="name" class="form-label">Name:</label>
                 <input type="text" id="name" name="name" class="form-control" required>
             </div>
+            <div class="mb-3">
+                <label for="description" class="form-label">Description:</label>
+                <textarea id="description" name="description" class="form-control" maxlength="1000" required></textarea>
+                <div id="descriptionHelpBlock" class="form-text">Maximum 1000 characters.</div>
+            </div>
             <button type="submit" class="btn btn-primary">Add Tag</button>
         </form>
-        <a class="btn btn-secondary mt-3" href="/tags/list">Back to Tag List</a>
+        <a class="btn btn-secondary mt-3" href="/admin/tags/">Back to Tag List</a>
     </div>
 </body>
 </html>

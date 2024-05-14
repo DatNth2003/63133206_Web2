@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -45,22 +46,12 @@
             </div>
             <!-- /Carousel -->
         </div>
-        <div class="container mt-5">
+		<div class="container mt-5">
             <h2>Chào mừng đến với BookBuddy</h2>
             <p>BookBuddy là nơi bạn có thể tìm kiếm và chia sẻ những cuốn sách yêu thích của mình.</p>
         </div>
         
-<th:block th:if="${loggedInUserAvatar != null}">
-    <!-- Nếu có ảnh avatar, hiển thị ảnh -->
-    <img th:src="@{${loggedInUserAvatar}}" class="img-fluid rounded-circle" alt="Avatar">
-</th:block>
-<th:block th:unless="${loggedInUserAvatar != null}">
-    <!-- Nếu không có ảnh avatar, hiển thị thông báo và ảnh mặc định -->
-    <p>Không có ảnh avatar</p>
-    <img src="/images/default-avatar.jpg" class="img-fluid rounded-circle" alt="Default Avatar">
-</th:block>
 
-        
     </main>
     <footer>
         <p>&copy; 2024 BookBuddy. All rights reserved.</p>

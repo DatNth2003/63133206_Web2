@@ -14,6 +14,7 @@
                 <tr>
                     <th>ID</th>
                     <th>Name</th>
+                    <th>Description</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -21,6 +22,7 @@
                 <tr th:each="tag : ${tags}">
                     <td th:text="${tag.id}"></td>
                     <td th:text="${tag.name}"></td>
+                    <td th:text="${tag.description}"></td>
                     <td>
                         <a class="btn btn-primary" th:href="@{/tags/edit/{id}(id=${tag.id})}">Edit</a>
                         <a class="btn btn-danger" th:href="@{/tags/delete/{id}(id=${tag.id})}">Delete</a>
@@ -28,7 +30,7 @@
                 </tr>
             </tbody>
         </table>
-        <a class="btn btn-success" href="/tags/add">Add New Tag</a>
+        <a class="btn btn-success" href="/admin/tags/add">Add New Tag</a>
     </div>
 </body>
 </html>

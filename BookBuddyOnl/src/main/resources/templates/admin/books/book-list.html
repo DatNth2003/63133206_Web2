@@ -28,27 +28,42 @@
         <thead>
             <tr>
                 <th>Title</th>
-                <th>Author</th>
+                <th>Authors</th>
+                <th>Tags</th>
                 <th>Price</th>
                 <th>Action</th>
             </tr>
         </thead>
         <tbody id="bookTable">
-            <!-- Loop through books and display each book -->
             <tr th:each="book : ${books}">
                 <td th:text="${book.title}">Title</td>
-                <td th:text="${book.authors}">Author</td>
+                <td>
+                    <ul>
+                        <li th:each="author : ${book.authors}" th:text="${author.name}"></li>
+                        <!-- CRUD Inline cho Author -->
+                        <li><a href="#" class="btn btn-info btn-sm">Edit</a></li>
+                        <li><a href="#" class="btn btn-danger btn-sm">Delete</a></li>
+                    </ul>
+                </td>
+                <td>
+                    <ul>
+                        <li th:each="tag : ${book.tags}" th:text="${tag.name}"></li>
+                        <!-- CRUD Inline cho Tag -->
+                        <li><a href="#" class="btn btn-info btn-sm">Edit</a></li>
+                        <li><a href="#" class="btn btn-danger btn-sm">Delete</a></li>
+                    </ul>
+                </td>
                 <td th:text="${book.price}">Price</td>
                 <td>
-                    <a th:href="@{'/books/edit-book/' + ${book.id}}" class="btn btn-info">Edit</a>
-					<button class="btn btn-danger" onclick="deleteBook('${book.id}')">Delete</button>
+                    <a th:href="@{'/admin/books/edit-book/' + ${book.id}}" class="btn btn-info">Edit</a>
+                    <button class="btn btn-danger" onclick="deleteBook('${book.id}')">Delete</button>
                 </td>
             </tr>
         </tbody>
     </table>
 
     <div class="text-center">
-        <a href="/books/add-book" class="btn btn-success">Add Book</a>
+        <a href="/admin/books/add-book" class="btn btn-success">Add Book</a>
     </div>
 
     <!-- Phân Trang -->
@@ -62,45 +77,38 @@
     </nav>
 </div>
 
-<!-- Thêm JavaScript của Bootstrap 5 và jQuery -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 
 <script th:inline="javascript">
-    var currentPage = 0;
+    var currentPage = /*[[${currentPage}]]*/ 0;
+    var totalPages = /*[[${totalPages}]]*/ 0;
     var prevPage = currentPage - 1;
     var nextPage = currentPage + 1;
     var lastPage = totalPages - 1;
 
     function searchByAuthor() {
         var author = $("#author").val();
-        $.get("/books?author=" + author, function(data) {
+        $.get("/admin/books?page=" + currentPage + "&author=" + author, function(data) {
             $("#bookTable").html(data);
         });
     }
 
     function sortBy() {
         var sortOption = $("#sortOption").val();
-        $.get("/books?page=" + currentPage + "&sort=" + sortOption, function(data) {
+        $.get("/admin/books?page=" + currentPage + "&sort=" + sortOption, function(data) {
             $("#bookTable").html(data);
         });
     }
 
     function goToPage(page) {
         currentPage = page;
-        $.get("/books?page=" + currentPage, function(data) {
+        $.get("/admin/books?page=" + currentPage, function(data) {
             $("#bookTable").html(data);
         });
     }
 
-    function redirectToEditPage(bookId) {
-        window.location.href = "/edit-book?id=" + bookId;
-    }
-
     function deleteBook(bookId) {
-        // Implement delete functionality here
-        // You can send an AJAX request to delete the book
-        // After successful deletion, you can refresh the page or update the book list
         console.log("Deleting book with ID: " + bookId);
     }
 </script>

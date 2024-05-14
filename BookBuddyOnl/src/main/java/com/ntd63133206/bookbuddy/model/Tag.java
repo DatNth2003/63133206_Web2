@@ -26,18 +26,27 @@ public class Tag {
     @NotBlank
     @Size(min = 1, max = 255)
     private String name;
-
+    
+    @Column(name = "description", length = 1000)
+    private String description;
+    
     @ManyToMany(mappedBy = "tags")
     private Set<Book> books = new HashSet<>();
 
     public Tag() {
     }
 
-    public Tag(String name) {
-        this.name = name;
-    }
 
-    public Long getId() {
+
+    public Tag(@NotNull @NotBlank @Size(min = 1, max = 255) String name, String description) {
+		super();
+		this.name = name;
+		this.description = description;
+	}
+
+
+
+	public Long getId() {
         return id;
     }
 
@@ -53,7 +62,15 @@ public class Tag {
         this.name = name;
     }
 
-    public Set<Book> getBooks() {
+    public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public Set<Book> getBooks() {
         return books;
     }
 
