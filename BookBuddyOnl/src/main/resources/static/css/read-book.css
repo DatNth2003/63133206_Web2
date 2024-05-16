@@ -1,0 +1,23 @@
+@charset "UTF-8";
+.flipbookkk{
+	margin-top: 15vh !important;
+	margin-bottom: 5vh !important;
+
+}
+
+    .flipbookkk-title{
+        color: #ffa200;
+        text-align: center;
+        font-size: 5vw !important;
+        font-family: "Poppins", Sans-serif;
+        font-weight: 900;
+        line-height: 75px;
+       text-shadow: 1px 3px 0px #373737;
+    }
+
+    @media(min-width: 768px){
+        .flipbookkk-title{
+        font-size: 2.5vw !important;
+    }
+
+    }

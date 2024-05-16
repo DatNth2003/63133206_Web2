@@ -51,6 +51,9 @@ public class Book {
             joinColumns = @JoinColumn(name = "book_id"),
             inverseJoinColumns = @JoinColumn(name = "author_id"))
     private Set<Author> authors = new HashSet<>();
+    @Lob
+    @Column(name = "pdf_content", columnDefinition = "BLOB")
+    private byte[] pdfContent;
 
     
     public Book() {
@@ -104,7 +107,15 @@ public class Book {
         this.coverImage = coverImage;
     }
 
-    public Set<Tag> getTags() {
+    public byte[] getPdfContent() {
+		return pdfContent;
+	}
+
+	public void setPdfContent(byte[] pdfContent) {
+		this.pdfContent = pdfContent;
+	}
+
+	public Set<Tag> getTags() {
         return tags;
     }
 

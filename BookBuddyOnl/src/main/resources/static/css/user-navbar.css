@@ -1,0 +1,59 @@
+/* user-navbar.css */
+.navbar {
+    background-color: black;
+    border-bottom: 2px solid #fbc02d;
+}
+
+.navbar-brand {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.navbar-brand span {
+    color: #fbc02d;
+}
+
+.navbar-brand span:nth-child(2) {
+    color: #ff8f00;
+}
+
+.nav-link {
+    font-size: 1.2rem;
+    color: #424242;
+    transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+    color: #fbc02d;
+}
+
+.navbar-text {
+    font-size: 1.2rem;
+    color: #424242;
+}
+
+.dropdown-menu {
+    background-color: #ffee58;
+}
+
+.dropdown-item {
+    color: #424242;
+    transition: background-color 0.3s ease;
+}
+
+.dropdown-item:hover {
+    background-color: #fbc02d;
+    color: #ffffff;
+}
+
+.btn-buddy {
+    background-color: #fbc02d;
+    border-color: #fbc02d;
+    color: #ffffff;
+    transition: background-color 0.3s ease;
+}
+
+.btn-buddy:hover {
+    background-color: #ff8f00;
+    border-color: #ff8f00;
+}

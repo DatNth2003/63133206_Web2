@@ -12,28 +12,36 @@ public class SecurityConfig {
 	@Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-    }
+	}
 	@Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeRequests()
                 .requestMatchers("/").permitAll()
-                .requestMatchers("/css/**", "/js/**", "/images/**", "/bootstrap-5.2.3-dist/**").permitAll()
+                .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                 .requestMatchers("/account/register/**").permitAll()
                 .requestMatchers("/account/login/**").permitAll()
                 .requestMatchers("/account/forgot-password/**").permitAll()
                 .requestMatchers("/account/reset-password/**").permitAll()
                 .requestMatchers("/account/profile").permitAll()
                 .requestMatchers("register","forgotPassword","resetPassword/**", "resetPassword").permitAll()
-                .requestMatchers("/admin/**").permitAll()
+                .requestMatchers("/account/profile").authenticated()
+                .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().permitAll()
             .and()
-            .logout(logout -> logout
-                    .logoutUrl("/logout")
-                    .logoutSuccessUrl("/")
-                    .invalidateHttpSession(true)
-                    .deleteCookies("JSESSIONID"))
-                .csrf().disable();
+            .formLogin(formLogin ->
+            formLogin
+                .loginPage("/account/login")
+                .defaultSuccessUrl("/",true)
+                .permitAll()
+        )
+        .logout(logout ->
+            logout
+                .logoutUrl("/account/logout")
+                .logoutSuccessUrl("/")
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID")
+        ).csrf().disable();
         return http.build();
     }
 }

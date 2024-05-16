@@ -50,11 +50,12 @@ public class User{
     @Transient
     private String passwordConfirm;
     
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_role",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
+
 
     @Column(name = "enabled")
     private boolean enabled;

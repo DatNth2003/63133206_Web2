@@ -18,14 +18,18 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 
 import com.ntd63133206.bookbuddy.model.User;
+import com.ntd63133206.bookbuddy.model.CustomUserDetails;
 import com.ntd63133206.bookbuddy.model.Role;
+import com.ntd63133206.bookbuddy.service.CustomUserDetailsService;
 import com.ntd63133206.bookbuddy.service.EmailService;
 import com.ntd63133206.bookbuddy.service.UserService;
 import com.ntd63133206.bookbuddy.util.Utility;
@@ -52,8 +56,15 @@ import net.bytebuddy.utility.RandomString;
 @Controller
 public class AccountController {
     
-    @Autowired
-    private UserService userService;
+	@Autowired
+	private CustomUserDetailsService customUserDetailsService;
+	private final UserService userService;
+
+	public AccountController(CustomUserDetailsService customUserDetailsService, UserService userService) {
+	    this.customUserDetailsService = customUserDetailsService;
+	    this.userService = userService;
+	}
+
 	@Autowired
     private JavaMailSender mailSender;
 
@@ -94,68 +105,86 @@ public class AccountController {
     }
 
     @GetMapping("/login")
-    public String showLoginForm() {
+    public String showLoginForm(Authentication authentication) {
+        if (authentication != null && authentication.isAuthenticated()) {
+            return "account/loginSuccess";
+        }
         return "/account/login";
     }
 
+
     @PostMapping("/login")
-    public String login(@ModelAttribute User user, Model model, HttpServletRequest request) {
-        System.out.println("Xử lý đăng nhập cho " + user.getUsername());
-        boolean authenticated = userService.authenticateUser(user.getUsername(), user.getPassword());
-        if (authenticated) {
-            System.out.println("Đăng nhập thành công");
-            User loggedInUser = userService.getUserByEmail(user.getUsername());
-            setSessionAttributes(request, loggedInUser);
-            getSessionAttributes(request);
-            return "redirect:/";
-        } else {
-            System.out.println("Mật khẩu không đúng hoặc người dùng không tồn tại");
-            model.addAttribute("errorMessage", "Email hoặc mật khẩu không đúng. Vui lòng thử lại.");
-            return "/account/login";
+    public String login(@ModelAttribute User user, Model model, HttpServletRequest request, RedirectAttributes redirectAttributes) {
+        CustomUserDetails customUserDetails;
+        try {
+            customUserDetails = (CustomUserDetails) customUserDetailsService.loadUserByUsername(user.getUsername());
+            if (customUserDetails != null) {
+                System.out.println("CustomUserDetails: " + customUserDetails.getAvatar());
+                model.addAttribute("authentication", customUserDetails);
+
+                boolean isAdmin = customUserDetails.getAuthorities().stream()
+                        .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
+
+                if (isAdmin) {
+                    return "redirect:/admin/";
+                } else {
+                    return "redirect:/";
+                }
+            } else {
+                System.out.println("CustomUserDetails is null!");
+                model.addAttribute("errorMessage", "Không thể đăng nhập. Vui lòng thử lại sau.");
+                return "redirect:/account/login?error";
+            }
+        } catch (UsernameNotFoundException e) {
+            System.out.println("Tên người dùng không tồn tại.");
+
+            model.addAttribute("errorMessage", "Tên người dùng không tồn tại.");
+            return "redirect:/account/login?error";
         }
     }
+
+
+
+
 
 
     @GetMapping("/profile")
-    public String showEditProfileForm(Model model, HttpServletRequest request) {
-        HttpSession session = request.getSession();
-        getSessionAttributes(request);
+    public String showEditProfileForm(Model model, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        String username = customUserDetails.getUsername();
+        System.out.println("Username retrieved from CustomUserDetails: " + username);
 
-        if (session.getAttribute("loggedInUserEmail") == null) {
-            return "redirect:/account/login";
+        User user = customUserDetails.getUser();
+        if (user != null) {
+            System.out.println("User retrieved successfully: " + user.toString());
+        } else {
+            System.out.println("User not found for username: " + username);
         }
 
-        String email = (String) session.getAttribute("loggedInUserEmail");
-        
-        User user = userService.getUserByEmail(email);
-        
         model.addAttribute("user", user);
-        
         return "account/profile";
     }
+
     @PostMapping("/profile")
     public String updateProfile(@RequestParam("username") String username,
                                 @RequestParam("avatarFile") MultipartFile avatarFile,
-                                HttpServletRequest request,
+                                @AuthenticationPrincipal CustomUserDetails customUserDetails,
                                 RedirectAttributes redirectAttributes) {
-        String email = (String) request.getSession().getAttribute("loggedInUserEmail");
-
         try {
-        	userService.updateProfile(email, username, avatarFile);
-            
-            User updatedUser = userService.getUserByEmail(email);
-            request.getSession().setAttribute("user", updatedUser);
-            setSessionAttributes(request, updatedUser);
-            System.out.println("updateProfile");
-            
+            userService.updateProfile(customUserDetails.getUsername(), username, avatarFile);
             redirectAttributes.addFlashAttribute("successMessage", "Thông tin cá nhân đã được cập nhật thành công.");
         } catch (IOException e) {
             e.printStackTrace();
-            System.out.println(e.getMessage());
             redirectAttributes.addFlashAttribute("errorMessage", "Không thể cập nhật thông tin cá nhân. Vui lòng thử lại sau.");
         }
-        
+
         return "redirect:/account/profile";
+    }
+
+
+
+    @GetMapping("/forgot-password")
+    public String showForgotPasswordForm() {
+        return "account/forgot-password";
     }
 
 
@@ -168,8 +197,12 @@ public class AccountController {
             if (userService.existsByEmail(email)) {
                 userService.updateResetPasswordToken(token, email);
                 String resetPasswordLink = Utility.getSiteURL(request) + "/reset-password?token=" + token;
-                sendEmail(email, resetPasswordLink);
-                model.addAttribute("message", "We have sent a reset password link to your email. Please check.");
+                // Gửi email và kiểm tra kết quả
+                if (sendEmail(email, resetPasswordLink)) {
+                    model.addAttribute("message", "We have sent a reset password link to your email. Please check.");
+                } else {
+                    model.addAttribute("error", "Failed to send reset password email.");
+                }
             } else {
                 model.addAttribute("error", "Email address not found.");
             }
@@ -181,26 +214,36 @@ public class AccountController {
     }
 
 
-	public void sendEmail(String recipientEmail, String link) throws Exception {
-		MimeMessage message = mailSender.createMimeMessage();
-		MimeMessageHelper helper = new MimeMessageHelper(message, true);
-		
-		helper.setFrom("bookbuddy@gmail.com", "BookBuddy Support");
-		helper.setTo(recipientEmail);
+    public boolean sendEmail(String recipientEmail, String link) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
-		String subject = "Here's the link to reset your password";
+            helper.setFrom("bookbuddy@gmail.com", "BookBuddy Support");
+            helper.setTo(recipientEmail);
 
-		String content = "<p>Hello,</p>"
-				+ "<p>You have requested to reset your password.</p>"
-				+ "<p>Click the link below to change your password:</p>"
-				+ "<p><a href=\"" + link + "\">Change my password</a></p>"
-				+ "<br>"
-				+ "<p>Ignore this email if you do remember your password, or you have not made the request.</p>";
+            String subject = "Here's the link to reset your password";
 
-		helper.setSubject(subject);
-		helper.setText(content, true);
-		mailSender.send(message);
-	}
+            String content = "<p>Hello,</p>"
+                    + "<p>You have requested to reset your password.</p>"
+                    + "<p>Click the link below to change your password:</p>"
+                    + "<p><a href=\"" + link + "\">Change my password</a></p>"
+                    + "<br>"
+                    + "<p>Ignore this email if you do remember your password, or you have not made the request.</p>";
+
+            helper.setSubject(subject);
+            helper.setText(content, true);
+            mailSender.send(message);
+
+            // Gửi email thành công
+            return true;
+        } catch (Exception e) {
+            // Gửi email thất bại, ghi log hoặc xử lý lỗi tại đây
+            System.out.println("Failed to send email: " + e.getMessage());
+            return false;
+        }
+    }
+
 
 	@GetMapping("/reset-password")
 	public String showResetPasswordForm(@Param(value = "token") String token, Model model) {
@@ -235,47 +278,8 @@ public class AccountController {
 		return "redirect:/account/login";
 	}
     @GetMapping("/logout")
-    public String logout(HttpServletRequest request) {
-        clearSessionAttributes(request);
-        System.out.println("Logout!");
+    public String logout(HttpServletRequest request) {        System.out.println("Logout!");
         return "redirect:/account/login";
-    }
-
-    private void setSessionAttributes(HttpServletRequest request, User user) {
-        HttpSession session = request.getSession();
-        session.setAttribute("loginSuccess", true);
-        session.setAttribute("loggedInUserEmail", user.getEmail());
-        session.setAttribute("loggedInUsername", user.getUsername());
-        String avatarPath = "/images/users/avatars/" + user.getAvatar();
-        session.setAttribute("loggedInUserAvatar", avatarPath);
-        
-        Set<String> userRoles = new HashSet<>();
-        for (Role role : user.getRoles()) {
-            userRoles.add(role.getName());
-        }
-        session.setAttribute("loggedInUserRoles", userRoles);
-    }
-
-    private void getSessionAttributes(HttpServletRequest request) {
-    	HttpSession session = request.getSession();
-    	Enumeration<String> attributeNames = session.getAttributeNames();
-    	while (attributeNames.hasMoreElements()) {
-    		String attributeName = attributeNames.nextElement();
-    		Object attributeValue = session.getAttribute(attributeName);
-    		System.out.println(attributeName + ": " + attributeValue);
-    	}
-    }
-    private void clearSessionAttributes(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            Enumeration<String> attributeNames = session.getAttributeNames();
-            while (attributeNames.hasMoreElements()) {
-                String attributeName = attributeNames.nextElement();
-                session.removeAttribute(attributeName);
-            }
-            session.invalidate();
-        }
-        System.out.println("Đã xóa session!");
     }
 
 }

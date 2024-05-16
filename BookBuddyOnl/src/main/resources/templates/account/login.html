@@ -1,18 +1,14 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="en">
-
 <head>
     <meta charset="UTF-8">
     <title>Login</title>
-    <!-- Bootstrap CSS -->
-    <link href="/bootstrap-5.2.3-dist/css/bootstrap.min.css" rel="stylesheet" type="text/css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" type="text/css">
-
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         body {
             background-color: #f8f9fa;
         }
-
         .container-custom {
             border: 1px solid #dee2e6;
             border-radius: 10px;
@@ -21,22 +17,18 @@
             background-color: #fff;
             box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1);
         }
-
-
         .btn-link {
             text-decoration: none;
             color: #007bff;
             margin-right: 15px;
             transition: color 0.3s;
         }
-
         .btn-link:hover {
             text-decoration: underline;
             color: #0056b3;
         }
     </style>
 </head>
-
 <body>
     <th:block th:replace="~{/fragments/user_navbar :: nav}"></th:block>
     <div class="container container-custom">
@@ -45,26 +37,22 @@
                 <h2 class="mb-4">Login</h2>
                 <form th:action="@{/account/login}" method="post">
                     <div th:if="${errorMessage}" class="alert alert-danger">
-                        <p th:text="${errorMessage}"></p>
-                    </div>
-                    <div th:if="${successMessage}" class="alert alert-success">
-                        <p th:text="${successMessage}"></p>
-                    </div>
+    					<p th:text="${errorMessage}"></p>
+					</div>
+
                     <div class="mb-3">
                         <label>Email:</label>
-        				<input type="text" class="form-control" name="username" required>
+                        <input type="text" class="form-control" name="username" required>
                     </div>
                     <div class="mb-3">
                         <label>Password:</label>
                         <div class="input-group">
-            			<input type="password" class="form-control" name="password" id="password" required>
+                            <input type="password" class="form-control" name="password" id="password" required>
                             <button type="button" class="btn btn-outline-secondary" id="togglePassword">
                                 <i class="bi bi-eye-slash"></i>
                             </button>
                         </div>
                     </div>
-                    <!-- CSRF Token -->
-                    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                     <button type="submit" class="btn btn-primary">Login</button>
                     <a th:href="@{/account/forgot-password}" class="btn btn-link">Forgot Password?</a>
                     <a th:href="@{/account/register}" class="btn btn-link">Don't have an account? Register</a>
@@ -75,7 +63,6 @@
     <script>
         const togglePassword = document.getElementById('togglePassword');
         const password = document.getElementById('password');
-
         togglePassword.addEventListener('click', function() {
             const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
             password.setAttribute('type', type);
@@ -83,9 +70,6 @@
             this.querySelector('i').classList.toggle('bi-eye-slash');
         });
     </script>
-
-    <script src="/bootstrap-5.2.3-dist/js/bootstrap.bundle.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>

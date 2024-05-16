@@ -1,6 +1,9 @@
 package com.ntd63133206.bookbuddy.service;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +12,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import com.ntd63133206.bookbuddy.model.Author;
+import com.ntd63133206.bookbuddy.model.Book;
+import com.ntd63133206.bookbuddy.model.Tag;
 
+import com.ntd63133206.bookbuddy.dto.BookSearchCriteria;
 import com.ntd63133206.bookbuddy.model.Author;
 import com.ntd63133206.bookbuddy.model.Book;
 import com.ntd63133206.bookbuddy.model.Tag;
@@ -88,4 +95,20 @@ public class BookService {
             bookRepository.save(book);
         });
     }
+
+	public void save(Book book) {
+	    bookRepository.save(book);
+
+	}
+	public Page<Book> searchBooks(BookSearchCriteria searchCriteria, Pageable pageable) {
+        return bookRepository.searchBooks(searchCriteria.getKeyword(),
+                                           searchCriteria.getAuthorIds(),
+                                           searchCriteria.getTagIds(),
+                                           searchCriteria.getMinPrice(),
+                                           searchCriteria.getMaxPrice(),
+                                           searchCriteria.getUpdatedAtStart(),
+                                           searchCriteria.getUpdatedAtEnd(),
+                                           pageable);
+    }
+
 }

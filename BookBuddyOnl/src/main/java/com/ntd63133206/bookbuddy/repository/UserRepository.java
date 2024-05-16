@@ -24,6 +24,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmail(String email);
     boolean existsByUsername(String username);
     List<User> findAll();    
+    Page<User> findAllByOrderByLastLoginDesc(Pageable pageable);
+
     @Query("SELECT u FROM User u WHERE (:keyword IS NULL OR LOWER(u.email) LIKE %:keyword% OR LOWER(u.username) LIKE %:keyword%) AND (:role IS NULL OR EXISTS (SELECT 1 FROM u.roles r WHERE LOWER(r.name) = LOWER(:role)))")
     Page<User> findByKeywordAndRole(String keyword, String role, Pageable pageable);
 
@@ -32,4 +34,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u FROM User u JOIN u.roles r WHERE :role IS NULL OR LOWER(r.name) = LOWER(:role)")
     Page<User> findByRole(String role, Pageable pageable);
+    @Query("SELECT u FROM User u WHERE u.lastLogin IS NOT NULL ORDER BY u.lastLogin DESC")
+    Page<User> findRecentlyLoggedInUsers(Pageable pageable);
 }

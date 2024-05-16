@@ -1,81 +1,140 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit User</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+	<link href="/css/admin/author-form.css" rel="stylesheet">
+    
 </head>
 <body>
-    <div class="container">
-        <h1>Chỉnh sửa người dùng</h1> 
-        <form th:action="@{/admin/users/edit/{id}(id=${user.id})}" method="post">
-            <input type="hidden" name="userId" th:value="${user.id}">
-            
-            <div class="form-group">
-                <label for="username">Username:</label>
-                <input type="text" class="form-control" id="username" name="username" th:value="${user.username}" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="email">Email:</label>
-                <input type="email" class="form-control" id="email" name="email" th:value="${user.email}" required>
-            </div>
-            
-            <div class="form-group">
-    			<label for="role">Role:</label>
-    			<select class="form-control" id="role" multiple>
-        			<option value="">-- Select Role --</option>
-        			<th:block th:each="role : ${roles}">
-            			<option th:value="${role.id}" th:text="${role.name}" th:selected="${user.roles.contains(role)}"></option>
-        			</th:block>
-    			</select>
-			</div>
+<div class="container container-custom">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <h2 class="mb-4">Edit User</h2>
+            <form th:action="@{/admin/users/edit/{id}(id=${user.id})}" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="userId" th:value="${user.id}">
+                <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+                <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
 
-            
-            <div id="selectedRolesContainer" class="form-group">
-            </div>
-            
-            <button type="button" class="btn btn-primary" onclick="addRole()">Add Role</button><br><br>
-            
-            <button type="submit" class="btn btn-primary">Save</button>
-        </form>
-    </div>
+                <div class="mb-3 row align-items-center">
+                    <div class="col-auto">
+                        <label for="avatar" class="form-label">Avatar:</label>
+                        <input type="file" class="form-control" id="avatar" name="avatarFile" accept="image/*" onchange="handleFileInput(this)">
+                    </div>
+                    <div class="col-auto">
+                        <img id="avatarPreview" class="avatar-preview img-thumbnail" alt="Avatar Preview" th:src="${user.avatar != null ? '@{' + user.avatar + '}' : '@{/images/default-avatar.png}'}">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email:</label>
+                    <input type="email" class="form-control" id="email" name="email" th:value="${user.email}" required>
+                </div>
 
-    <!-- Link to Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
-    <!-- JavaScript functions -->
-    <script>
-        function addRole() {
-            var roleSelect = document.getElementById("role");
-            var selectedRolesContainer = document.getElementById("selectedRolesContainer");
-
-            // Create a new div for each selected role
-            Array.from(roleSelect.selectedOptions).forEach(function(option) {
-                var roleId = option.value;
-                var roleName = option.text;
-
-                var selectedRoleDiv = document.createElement("div");
-                selectedRoleDiv.className = "selected-role";
-                selectedRoleDiv.innerHTML = roleName + ' <button type="button" class="btn btn-sm btn-danger" onclick="removeRole(this)">X</button>';
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username:</label>
+                    <input type="text" class="form-control" id="username" name="username" th:value="${user.username}" required>
+                </div>
                 
-                var hiddenInput = document.createElement("input");
-                hiddenInput.type = "hidden";
-                hiddenInput.name = "selectedRoles";
-                hiddenInput.value = roleId;
+                <div class="mb-3">
+                    <label for="selectedRoles">Roles:</label>
+                    <div class="input-group">
+                        <select id="availableRoles" class="form-select">
+                            <option th:each="role : ${roles}" th:value="${role.id}" th:text="${role.name}"></option>
+                        </select>
+                        <button type="button" class="btn btn-outline-secondary" onclick="addRole()">+</button>
+                    </div>
+                    <div id="selectedRolesTags" class="mt-2">
+                        <span th:each="role : ${user.roles}" class="role-tag" th:data-id="${role.id}">
+                            <span th:text="${role.name}"></span>
+                            <span class="remove-role" onclick="removeRole(this)"> x</span>
+                        </span>
+                    </div>
+                </div>
+                
+                <div id="selectedRolesInputs"></div>
 
-                selectedRoleDiv.appendChild(hiddenInput);
-                selectedRolesContainer.appendChild(selectedRoleDiv);
-            });
+                <button type="submit" class="btn btn-primary">Save</button>
+                <a th:href="@{/admin/users}" class="btn btn-secondary">Back to User List</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script>
+    function handleFileInput(input) {
+        const file = input.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('avatarPreview').src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function addRole() {
+        const availableRoles = document.getElementById('availableRoles');
+        const selectedRoleId = availableRoles.value;
+        const selectedRoleName = availableRoles.options[availableRoles.selectedIndex].text;
+
+        const existingTags = document.querySelectorAll('#selectedRolesTags .role-tag');
+        for (let tag of existingTags) {
+            if (tag.getAttribute('data-id') === selectedRoleId) {
+                return;
+            }
         }
 
-        function removeRole(button) {
-            var selectedRoleDiv = button.parentElement;
-            selectedRoleDiv.remove();
+        const roleTag = document.createElement('span');
+        roleTag.className = 'role-tag';
+        roleTag.setAttribute('data-id', selectedRoleId);
+
+        const roleNameSpan = document.createElement('span');
+        roleNameSpan.innerText = selectedRoleName;
+        roleTag.appendChild(roleNameSpan);
+
+        const removeButton = document.createElement('span');
+        removeButton.className = 'remove-role';
+        removeButton.innerText = ' x';
+        removeButton.onclick = function() {
+            removeRole(removeButton);
+        };
+        roleTag.appendChild(removeButton);
+
+        document.getElementById('selectedRolesTags').appendChild(roleTag);
+
+        const roleInput = document.createElement('input');
+        roleInput.type = 'hidden';
+        roleInput.name = 'selectedRoles';  // Đặt tên cho input hidden
+        roleInput.value = selectedRoleId;
+        roleInput.setAttribute('data-id', selectedRoleId);
+
+        document.getElementById('selectedRolesInputs').appendChild(roleInput);
+    }
+
+    function removeRole(button) {
+        const roleTag = button.parentElement;
+        const roleId = roleTag.getAttribute('data-id');
+        roleTag.parentElement.removeChild(roleTag);
+
+        const hiddenInputs = document.querySelectorAll('#selectedRolesInputs input');
+        hiddenInputs.forEach(input => {
+            if (input.getAttribute('data-id') === roleId) {
+                input.parentElement.removeChild(input);
+            }
+        });
+
+        // Kiểm tra nếu không có vai trò nào được chọn, không tạo input hidden
+        const selectedRolesInputs = document.querySelectorAll('#selectedRolesInputs input');
+        if (selectedRolesInputs.length === 0) {
+            return;
         }
-    </script>
+    }
+
+</script>
+
 </body>
 </html>

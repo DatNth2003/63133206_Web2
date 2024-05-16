@@ -32,12 +32,10 @@ public class Author {
     private String description;
     
     public Author() {
-        // Default constructor
     }
 
 
     public Author(String name, String description) {
-		super();
 		this.name = name;
 		this.description = description;
 	}
@@ -91,5 +89,12 @@ public class Author {
         this.books.remove(book);
         book.getAuthors().remove(this);
     }
+
+
+	@Override
+	public String toString() {
+		return "Author [id=" + id + ", name=" + name + ", authorImage=" + authorImage + ", books=" + books
+				+ ", description=" + description + "]";
+	}
     
 }

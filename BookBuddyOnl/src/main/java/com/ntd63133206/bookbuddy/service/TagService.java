@@ -22,10 +22,10 @@ public class TagService {
         tagRepository.save(tag);
     }
 
-    public Tag getTagById(Long id) {
-        Optional<Tag> result = tagRepository.findById(id);
-        return result.orElse(null);
+    public Optional<Tag> findById(Long id) {
+        return tagRepository.findById(id);
     }
+
     public Tag findByName(String name) {
         return tagRepository.findByName(name);
     }
@@ -34,14 +34,17 @@ public class TagService {
         tagRepository.save(tag);
     }
     public void updateTag(Long id, Tag tag) {
-        Tag existingTag = getTagById(id);
-        if (existingTag != null) {
+        Optional<Tag> tagOpt = findById(id);
+        if (tagOpt.isPresent()) {
+            Tag existingTag = tagOpt.get();
             existingTag.setName(tag.getName());
             tagRepository.save(existingTag);
         }
     }
 
+
     public void deleteTag(Long id) {
         tagRepository.deleteById(id);
     }
+
 }

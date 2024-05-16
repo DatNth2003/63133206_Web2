@@ -48,56 +48,54 @@ public class BookController {
     @Autowired
     private TagService tagService;
     
-    @GetMapping("/add-book")
+    @GetMapping("/add")
     public String showAddBookForm(Model model) {
-        // Load danh sách tác giả và tag từ cơ sở dữ liệu
         List<Author> authors = authorService.findAll();
         List<Tag> tags = tagService.getAllTags();
         model.addAttribute("authors", authors);
         model.addAttribute("tags", tags);
-        // Trả về trang form
         return "/admin/books/add-book";
     }
 
-    @PostMapping("/add-book")
+    @PostMapping("/add")
     public String addBook(@ModelAttribute Book book,
                           @RequestParam("coverImageFile") MultipartFile coverImage,
+                          @RequestParam("pdfFile") MultipartFile pdfFile,
                           @RequestParam("selectedAuthors") List<Long> authorIds,
                           @RequestParam("selectedTags") List<Long> tagIds,
                           RedirectAttributes redirectAttributes) {
         try {
-            // Xử lý tác giả
             for (Long authorId : authorIds) {
                 Optional<Author> authorOpt = authorService.findById(authorId);
-                authorOpt.ifPresent(book::addAuthor);
+                authorOpt.ifPresent(author -> book.getAuthors().add(author));
             }
             
-            // Xử lý tag
             for (Long tagId : tagIds) {
                 Optional<Tag> tagOpt = tagService.findById(tagId);
-                tagOpt.ifPresent(book::addTag);
+                tagOpt.ifPresent(tag -> book.getTags().add(tag));
             }
             
-            // Xử lý lưu ảnh bìa
             if (!coverImage.isEmpty()) {
                 String coverImagePath = saveCoverImage(coverImage);
-                book.setCoverImage(coverImagePath);
+                book.setCoverImage(coverImagePath.getBytes());
             }
-
-            // Lưu sách
+            if (!pdfFile.isEmpty()) {
+                byte[] pdfContent = pdfFile.getBytes();
+                book.setPdfContent(pdfContent);
+            }
             bookService.save(book);
 
             redirectAttributes.addFlashAttribute("successMessage", "Book added successfully.");
-            return "redirect:/admin/books/add-book";
+            return "redirect:/admin/books/add";
         } catch (IOException e) {
             e.printStackTrace();
             redirectAttributes.addFlashAttribute("errorMessage", "Error adding book. Please try again.");
-            return "redirect:/admin/books/add-book";
+            return "redirect:/admin/books/add";
         }
     }
+
     private String saveCoverImage(MultipartFile coverImage) throws IOException {
-        // Xử lý lưu ảnh bìa vào một thư mục và trả về đường dẫn
-        // Ví dụ:
+
         String uploadDir = "uploads/book-covers/";
         String fileName = UUID.randomUUID().toString() + "_" + coverImage.getOriginalFilename();
         Path uploadPath = Paths.get(uploadDir);

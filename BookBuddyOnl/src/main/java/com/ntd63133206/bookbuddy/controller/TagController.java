@@ -1,6 +1,7 @@
 package com.ntd63133206.bookbuddy.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -51,7 +52,7 @@ public class TagController {
 
     @GetMapping("/edit/{id}")
     public String showEditForm(@PathVariable("id") Long id, Model model) {
-        Tag tag = tagService.getTagById(id);
+        Optional<Tag> tag = tagService.findById(id);
         model.addAttribute("tag", tag);
         return "/admin/tags/edit-tag";
     }

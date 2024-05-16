@@ -1,93 +1,74 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-
-    <style>
-      .bd-placeholder-img {
-        font-size: 1.125rem;
-        text-anchor: middle;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        user-select: none;
-      }
-
-      @media (min-width: 768px) {
-        .bd-placeholder-img-lg {
-          font-size: 3.5rem;
-        }
-      }
-    </style>
-    <link href="/css/admin/sidebar.css" rel="stylesheet">
-  </head>
-  <body>
-
 <main>
     <div class="b-example-divider"></div>
-
-  <div class="flex-shrink-0 p-3 bg-white" style="width: 280px;">
-    <a href="/admin/" class="d-flex align-items-center pb-3 mb-3 link-dark text-decoration-none border-bottom">
-      <svg class="bi me-2" width="30" height="24"><use xlink:href="#bootstrap"/></svg>
-      <span class="fs-5 fw-semibold">Dashboard</span>
-    </a>
-    <ul class="list-unstyled ps-0">
-      <li class="mb-1">
-        <button class="btn btn-toggle align-items-center rounded collapsed" data-bs-toggle="collapse" data-bs-target="#home-collapse" aria-expanded="true">
-          Home
-        </button>
-        <div class="collapse show" id="home-collapse">
-          <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-            <li><a href="#" class="link-dark rounded">Overview</a></li>
-            <li><a href="#" class="link-dark rounded">Updates</a></li>
-            <li><a href="#" class="link-dark rounded">Reports</a></li>
-          </ul>
-        </div>
-      </li>
-      <li class="mb-1">
-        <button class="btn btn-toggle align-items-center rounded collapsed" data-bs-toggle="collapse" data-bs-target="#dashboard-collapse" aria-expanded="false">
-          Dashboard
-        </button>
-        <div class="collapse" id="dashboard-collapse">
-          <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-            <li><a href="#" class="link-dark rounded">Overview</a></li>
-            <li><a href="#" class="link-dark rounded">Weekly</a></li>
-            <li><a href="#" class="link-dark rounded">Monthly</a></li>
-            <li><a href="#" class="link-dark rounded">Annually</a></li>
-          </ul>
-        </div>
-      </li>
-      <li class="mb-1">
-        <button class="btn btn-toggle align-items-center rounded collapsed" data-bs-toggle="collapse" data-bs-target="#books-collapse" aria-expanded="false">
-          Books
-        </button>
-        <div class="collapse" id="books-collapse">
-          <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-            <li><a href="#" class="link-dark rounded">New</a></li>
-            <li><a href="#" class="link-dark rounded">Processed</a></li>
-            <li><a href="#" class="link-dark rounded">Shipped</a></li>
-            <li><a href="#" class="link-dark rounded">Returned</a></li>
-          </ul>
-        </div>
-      </li>
-      <li class="mb-1">
-        <button class="btn btn-toggle align-items-center rounded collapsed" data-bs-toggle="collapse" data-bs-target="#users-collapse" aria-expanded="false">
-          Users
-        </button>
-        <div class="collapse" id="users-collapse">
-          <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-            <li><a href="#" class="link-dark rounded">New...</a></li>
-            <li><a href="#" class="link-dark rounded">Profile</a></li>
-            <li><a href="#" class="link-dark rounded">Settings</a></li>
-            <li><a href="#" class="link-dark rounded">Sign out</a></li>
-          </ul>
-        </div>
-      </li>
-    </ul>
-  </div>
+    <div class="flex-shrink-0 p-3 bg-white" style="width: 280px;">
+        <a href="/admin/" class="d-flex align-items-center pb-3 mb-3 link-dark text-decoration-none border-bottom">
+            <i class="bi bi-speedometer2 me-2"></i>
+            <span class="fs-5 fw-semibold">Dashboard</span>
+        </a>
+        <ul class="list-unstyled ps-0">
+            <li class="mb-1">
+                <button class="btn btn-toggle align-items-center rounded" data-bs-toggle="collapse" data-bs-target="#home-collapse" aria-expanded="false">
+                    <i class="bi bi-house-door me-2"></i>
+                    Home
+                </button>
+                <div class="collapse" id="home-collapse">
+                    <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+                        <li><a href="#" class="link-dark rounded">Overview</a></li>
+                        <li><a href="#" class="link-dark rounded">Updates</a></li>
+                        <li><a href="#" class="link-dark rounded">Reports</a></li>
+                    </ul>
+                </div>
+            </li>
+            <li class="mb-1">
+                <button class="btn btn-toggle align-items-center rounded" data-bs-toggle="collapse" data-bs-target="#dashboard-collapse" aria-expanded="false">
+                    <i class="bi bi-bar-chart-fill me-2"></i>
+                    Dashboard
+                </button>
+                <div class="collapse" id="dashboard-collapse">
+                    <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+                        <li><a href="#" class="link-dark rounded">Overview</a></li>
+                        <li><a href="#" class="link-dark rounded">Weekly</a></li>
+                        <li><a href="#" class="link-dark rounded">Monthly</a></li>
+                        <li><a href="#" class="link-dark rounded">Annually</a></li>
+                    </ul>
+                </div>
+            </li>
+            <li class="mb-1">
+                <button class="btn btn-toggle align-items-center rounded" data-bs-toggle="collapse" data-bs-target="#books-collapse" aria-expanded="false">
+                    <i class="bi bi-book-fill me-2"></i>
+                    Books
+                </button>
+                <div class="collapse" id="books-collapse">
+                    <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+                        <li><a href="/admin/books/" class="link-dark rounded">List</a></li>
+                        <li><a href="/admin/books/add" class="link-dark rounded">Add</a></li>
+                    </ul>
+                </div>
+            </li>
+            <li class="mb-1">
+			    <button class="btn btn-toggle align-items-center rounded" data-bs-toggle="collapse" data-bs-target="#authors-collapse" aria-expanded="false">
+			        <i class="bi bi-person-fill me-2"></i>
+			        Authors
+			    </button>
+			    <div class="collapse" id="authors-collapse">
+			        <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+			            <li><a href="/admin/authors/" class="link-dark rounded">List</a></li>
+			            <li><a href="/admin/authors/add" class="link-dark rounded">Add</a></li>
+			        </ul>
+			    </div>
+			</li>
+            <li class="mb-1">
+                <button class="btn btn-toggle align-items-center rounded" data-bs-toggle="collapse" data-bs-target="#users-collapse" aria-expanded="false">
+                    <i class="bi bi-people-fill me-2"></i>
+                    Users
+                </button>
+                <div class="collapse" id="users-collapse">
+                    <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+                        <li><a href="/admin/users/" class="link-dark rounded">List</a></li>
+                        <li><a href="/admin/users/add" class="link-dark rounded">Add</a></li>
+                    </ul>
+                </div>
+            </li>
+        </ul>
+    </div>
 </main>
-
-      <script src="/js/admin/sidebar.js"></script>
-  </body>
-</html>

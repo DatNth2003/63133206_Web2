@@ -1,39 +1,44 @@
 package com.ntd63133206.bookbuddy.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 
-import com.ntd63133206.bookbuddy.model.Role;
 import com.ntd63133206.bookbuddy.model.User;
+import com.ntd63133206.bookbuddy.repository.UserRepository;
 
-import jakarta.servlet.http.HttpSession;
-
+import java.util.List;
+@PreAuthorize("hasRole('ROLE_ADMIN')")
 @RequestMapping("/admin")
 @Controller
 public class AdminController {
+	@Autowired
+	private UserRepository userRepository;
+
 	@GetMapping({"", "/", "/index"})
-    public String adminPage(HttpSession session) {
-		User loggedInUser = (User) session.getAttribute("loggedInUser");
-	    if (loggedInUser != null) {
-	        if (checkAdminRole(loggedInUser)) {
-	            System.out.println("Admin: Xác thực thành công cho " + loggedInUser.getUsername());
-	            return "admin/index";
-	        } else {
-	            System.out.println("Admin: Xác thực thành công thất bại!");
-	            return "error/access-denied";
-	        }
+	public String adminPage(Model model) {
+	    int page = 0; // trang đầu tiên
+	    int size = 10; // số lượng người dùng mỗi trang
+
+	    Pageable pageable = PageRequest.of(page, size);
+	    Page<User> usersPage = userRepository.findAllByOrderByLastLoginDesc(pageable);
+
+	    if (usersPage != null) {
+	        List<User> userList = usersPage.getContent();
+	        model.addAttribute("usersPage", userList);
 	    } else {
-	    	return "error/access-denied";
+	        model.addAttribute("errorMessage", "No users found.");
 	    }
-    }
-	private boolean checkAdminRole(User user) {
-        for (Role role : user.getRoles()) {
-            if ("ADMIN".equals(role.getName())) {
-                return true;
-            }
-        }
-        return false;
-    }
+
+	    return "admin/index";
+	}
+
+
 }

@@ -1,6 +1,7 @@
 body {
   min-height: 100vh;
   min-height: -webkit-fill-available;
+  margin: 0;
 }
 
 html {
@@ -15,6 +16,8 @@ main {
   max-height: 100vh;
   overflow-x: auto;
   overflow-y: hidden;
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 .b-example-divider {

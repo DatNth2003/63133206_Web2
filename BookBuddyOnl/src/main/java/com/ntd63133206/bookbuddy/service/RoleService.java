@@ -21,9 +21,9 @@ public class RoleService {
 
     public List<Role> getAllRoles() {
         List<Role> roles = roleRepository.findAll();
-        for (Role role : roles) {
-            System.out.println(role.getName());
-        }
+//        for (Role role : roles) {
+//            System.out.println(role.getName());
+//        }
         return roles;
     }
 
