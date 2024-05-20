@@ -46,7 +46,7 @@
         <div class="avatar-container">
             <img class="avatar rounded-circle"  id="avatarPreview" alt="Avatar" src="/images/default/default-avatar.jpg">
             <span class="bi bi-arrow-right-circle avatar-arrow"></span>
-			<img th:src="${#authentication.principal.avatar != null ? '/uploads/images/users/' + #authentication.principal.avatar : '/images/default/default-avatar.jpg'}" class="avatar rounded-circle" alt="Avatar">
+			<img th:src="${#authentication.principal.avatar != null ? 'images/users/' + #authentication.principal.avatar : '/images/default/default-avatar.jpg'}" class="avatar rounded-circle" alt="Avatar">
         </div>
         <button type="submit" class="btn btn-primary mt-3">Update Profile</button>
     </form>

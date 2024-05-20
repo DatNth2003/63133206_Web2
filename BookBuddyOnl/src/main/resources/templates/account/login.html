@@ -16,6 +16,7 @@
             margin-top: 50px;
             background-color: #fff;
             box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1);
+            position: relative;
         }
         .btn-link {
             text-decoration: none;
@@ -27,18 +28,35 @@
             text-decoration: underline;
             color: #0056b3;
         }
+        .avatar-container {
+            position: absolute;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 2px solid #ced4da;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+        .avatar-container img {
+            width: 100%;
+            height: auto;
+        }
     </style>
 </head>
 <body>
+
     <th:block th:replace="~{/fragments/user_navbar :: nav}"></th:block>
     <div class="container container-custom">
+        <div class="avatar-container">
+            <img src="/images/users/avatars/default/default-avatar.jpg" alt="Default Avatar">
+        </div>
         <div class="row justify-content-center">
             <div class="col-md-6">
                 <h2 class="mb-4">Login</h2>
                 <form th:action="@{/account/login}" method="post">
-                    <div th:if="${errorMessage}" class="alert alert-danger">
-    					<p th:text="${errorMessage}"></p>
-					</div>
+                    <div th:if="${error}" class="alert alert-danger">
+                        <p th:text="${error}"></p>
+                    </div>
 
                     <div class="mb-3">
                         <label>Email:</label>

@@ -1,6 +1,7 @@
 package com.ntd63133206.bookbuddy.repository;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.data.domain.Page;
@@ -37,5 +38,9 @@ public interface BookRepository extends JpaRepository<Book, Long> {
                             @Param("updatedAtEnd") LocalDate updatedAtEnd,
                             Pageable pageable);
 
+
+    List<Book> findTop10ByOrderByUpdatedAtDesc(Pageable pageable);
+
+    List<Book> findTop10ByOrderByUpdatedAtDesc();
 
 }

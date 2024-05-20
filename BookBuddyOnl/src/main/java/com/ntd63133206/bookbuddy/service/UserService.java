@@ -20,6 +20,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -29,13 +30,12 @@ import java.util.UUID;
 @Service
 public class UserService {
 
-    private static final String UPLOAD_DIR = "/images/users/avatars";
+	private static final String UPLOAD_DIR = "src/main/resources/static/images/users/avatars/";
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
-    @Autowired
     public UserService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
@@ -48,13 +48,14 @@ public class UserService {
             User adminUser = new User();
             adminUser.setUsername("admin");
             adminUser.setEmail("dat.nth.63cntt@ntu.edu.vn");
-            adminUser.setPassword(passwordEncoder.encode("admin@1234"));
+            adminUser.setPassword(passwordEncoder.encode("Admin@1234"));
+            adminUser.setAvatar("default/default-avatar.jpg");
             adminUser.setEnabled(true);
-
-            Role adminRole = roleRepository.findFirstByName("ADMIN");
+            
+            Role adminRole = roleRepository.findByName("ROLE_ADMIN");
             if (adminRole == null) {
                 adminRole = new Role();
-                adminRole.setName("ADMIN");
+                adminRole.setName("ROLE_ADMIN");
                 roleRepository.save(adminRole);
             }
 
@@ -65,8 +66,9 @@ public class UserService {
         }
     }
 
+
     public void assignRoleToUser(User user, Role newRole) {
-        Role existingRole = roleRepository.findFirstByName(newRole.getName());
+        Role existingRole = roleRepository.findByName(newRole.getName());
         if (existingRole != null && !user.getRoles().contains(existingRole)) {
             user.getRoles().add(existingRole);
             userRepository.save(user);
@@ -91,10 +93,10 @@ public class UserService {
             return false;
         }
 
-        Role roleUser = roleRepository.findFirstByName("USER");
+        Role roleUser = roleRepository.findByName("ROLE_USER");
         if (roleUser == null) {
             roleUser = new Role();
-            roleUser.setName("USER");
+            roleUser.setName("ROLE_USER");
             roleRepository.save(roleUser);
         }
 
@@ -159,11 +161,10 @@ public class UserService {
             if (oldAvatarFileName != null && !oldAvatarFileName.isEmpty()) {
                 deleteAvatar(oldAvatarFileName);
             }
-
             String avatarFileName = saveAvatar(avatarFile);
             user.setAvatar(avatarFileName);
+            System.out.println("Đã lưu: " + avatarFileName  + " cho " + user.getEmail());
             userRepository.save(user);
-            System.out.println("Updated avatar path for user: " + user.getEmail());
         } else {
             throw new IllegalArgumentException("User cannot be null");
         }
@@ -179,26 +180,36 @@ public class UserService {
         }
     }
 
-    public String saveAvatar(MultipartFile avatarFile) throws IOException {
-        if (avatarFile.isEmpty()) {
-            throw new IllegalArgumentException("Avatar file is empty");
+    public String saveAvatar(MultipartFile avatarFile) {
+        try {
+            if (avatarFile.isEmpty()) {
+                throw new IllegalArgumentException("Avatar file is empty");
+            }
+            
+            System.out.println("Đang tải ảnh: " + avatarFile.getOriginalFilename());
+
+            String originalFileName = avatarFile.getOriginalFilename();
+            String fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
+            String filename = UUID.randomUUID().toString() + fileExtension; // Tên file với UUID + đuôi mở rộng
+
+            Path directory = Paths.get(UPLOAD_DIR);
+
+            if (!Files.exists(directory)) {
+                Files.createDirectories(directory);
+                System.out.println("Created directory: " + directory.toString());
+            }
+
+            Path path = directory.resolve(filename);
+            Files.copy(avatarFile.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+            System.out.println("Saved Avatar: " + path.toString());
+
+            return filename;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
         }
-        System.out.println("Đang tải ảnh: " + avatarFile.getOriginalFilename());
-
-        String filename ="useravatar" + "-" + UUID.randomUUID().toString();
-        Path directory = Paths.get(UPLOAD_DIR);
-
-        if (!Files.exists(directory)) {
-            Files.createDirectories(directory);
-            System.out.println("Created directory: " + directory.toString());
-        }
-
-        Path path = directory.resolve(filename);
-        Files.copy(avatarFile.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-        System.out.println("Saved Avatar: " + path.toString());
-
-        return filename;
     }
+
 
     public void updateUsername(String oldUsername, String newUsername) {
         User user = userRepository.findByUsername(oldUsername);
@@ -219,6 +230,7 @@ public class UserService {
             User user = userRepository.findByUsername(newUsername);
             if (user != null) {
                 System.out.println("User with username exists: " + newUsername);
+
                 updateAvatar(user, avatarFile);
             } else {
                 System.out.println("User with username does not exist: " + newUsername);

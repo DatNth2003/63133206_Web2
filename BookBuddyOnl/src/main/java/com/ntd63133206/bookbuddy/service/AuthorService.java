@@ -22,7 +22,7 @@ import com.ntd63133206.bookbuddy.repository.AuthorRepository;
 @Service
 public class AuthorService {
 
-    private static final String UPLOAD_DIR = "/images/authors/";
+    private static final String UPLOAD_DIR = "src/main/resources/static/images/authors/";
 
     @Autowired
     private AuthorRepository authorRepository;
@@ -47,32 +47,43 @@ public class AuthorService {
         return authorRepository.findByNameContainingIgnoreCase(keyword, pageable);
     }
 
-    public String saveAuthorImage(MultipartFile authorImage) throws IOException {
-        if (authorImage.isEmpty()) {
-            throw new IllegalArgumentException("Author image file is empty");
+    public String saveAuthorImage(MultipartFile authorImage) {
+        try {
+            if (authorImage.isEmpty()) {
+                throw new IllegalArgumentException("Author image file is empty");
+            }
+
+            System.out.println("Đang tải ảnh: " + authorImage.getOriginalFilename());
+
+            String originalFileName = authorImage.getOriginalFilename();
+            String fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
+            String filename = "authorimage" + UUID.randomUUID().toString() + fileExtension; // Tên file với UUID + đuôi mở rộng
+
+            Path directory = Paths.get(UPLOAD_DIR);
+
+            if (!Files.exists(directory)) {
+                Files.createDirectories(directory);
+                System.out.println("Created directory: " + directory.toString());
+            }
+
+            Path path = directory.resolve(filename);
+            Files.copy(authorImage.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+            System.out.println("Saved Author Image: " + path.toString());
+
+            return filename;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
         }
-        System.out.println("Đang tải ảnh: " + authorImage.getOriginalFilename());
-
-        String fileName = "authorimage" + UUID.randomUUID().toString();
-        Path directory = Paths.get(UPLOAD_DIR);
-
-        if (!Files.exists(directory)) {
-            Files.createDirectories(directory);
-            System.out.println("Created directory: " + directory.toString());
-        }
-
-        Path path = directory.resolve(fileName);
-        Files.copy(authorImage.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-        System.out.println("Saved Author Image: " + path.toString());
-
-        return fileName;
     }
+
 
 
     public Author save(Author author) {
         System.out.println("Saving author: " + author);
         return authorRepository.save(author);
     }
+    
 
 
 }

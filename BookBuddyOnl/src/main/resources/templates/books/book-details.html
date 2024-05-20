@@ -23,13 +23,6 @@
             color: white;
             padding: 10px;
         }
-        .book-card {
-            text-align: center;
-        }
-        .carousel-control-prev,
-        .carousel-control-next {
-            width: 5%;
-        }
     </style>
 </head>
 <body>
@@ -64,46 +57,36 @@
             <p>BookBuddy là nơi bạn có thể tìm kiếm và chia sẻ những cuốn sách yêu thích của mình.</p>
         </div>
         <div class="container mt-5">
-    <h2>Sách mới nhất</h2>
-		    <div th:if="${not #lists.isEmpty(partitionedBooks)}">
-		        <div id="latestBooksCarousel" class="carousel slide" data-bs-ride="carousel">
-		            <div class="carousel-inner">
-		                <!-- Loop through partitioned book groups -->
-		                <div th:each="bookChunk, chunkStat : ${partitionedBooks}">
-		                    <div class="carousel-item" th:classappend="${chunkStat.index == 0} ? 'active'">
-		                        <div class="row">
-		                            <div th:each="book, iterStat : ${bookChunk}" class="col-md-3 book-card">
-		                                <div class="card">
-		                                    <img th:src="@{${book.coverImage != null} ? '/images/books/covers/' + ${book.coverImage} : '/images/books/covers/default/default.png'}" class="card-img-top" alt="Book Image">
-		                                    <div class="card-body">
-		                                        <h5 class="card-title" th:text="${book.title}"></h5>
-		                                        <p class="card-text" th:text="${book.description}"></p>
-		                                    </div>
-		                                </div>
-		                            </div>
-		                            <!-- Add empty divs to make up for less than 4 books in a chunk -->
-		                            <div th:if="${bookChunk.size() < 4}" th:each="i : ${#numbers.sequence(bookChunk.size() + 1, 4)}" class="col-md-3 book-card"></div>
-		                        </div>
-		                    </div>
-		                </div>
-		            </div>
-		            <button class="carousel-control-prev" type="button" data-bs-target="#latestBooksCarousel" data-bs-slide="prev">
-		                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-		                <span class="visually-hidden">Previous</span>
-		            </button>
-		            <button class="carousel-control-next" type="button" data-bs-target="#latestBooksCarousel" data-bs-slide="next">
-		                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-		                <span class="visually-hidden">Next</span>
-		            </button>
-		        </div>
-		    </div>
-
-		</div>
-
-		<div class="container mt-5" th:if="${#lists.isEmpty(partitionedBooks)}">
-		    <p>Chưa có sách.</p>
-		</div>
-
+            <h2>Sách mới nhất</h2>
+            <div id="latestBooksCarousel" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                    <!-- Thay đổi th:each để tạo ra các carousel-item với 4 sách mỗi dòng -->
+                    <div th:each="bookChunk, chunkStat : ${#numbers.sequence(0, latestBooks.size() / 4 - 1)}">
+                        <div class="carousel-item" th:classappend="${chunkStat.index == 0} ? 'active'">
+                            <div class="row">
+                                <div th:each="book, iterStat : ${latestBooks.subList(chunkStat.index * 4, chunkStat.index * 4 + 4)}" class="col-md-3">
+                                    <div class="card">
+                                        <img th:src="@{${book.coverImage != null} ? '/images/books/covers/' + ${book.coverImage} : '/images/books/covers/default/default.png'}" class="card-img-top" alt="Book Image">
+                                        <div class="card-body">
+                                            <h5 class="card-title" th:text="${book.title}"></h5>
+                                            <p class="card-text" th:text="${book.description}"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#latestBooksCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#latestBooksCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+            </div>
+        </div>
     </main>
     <footer>
         <p>&copy; 2024 BookBuddy. All rights reserved.</p>

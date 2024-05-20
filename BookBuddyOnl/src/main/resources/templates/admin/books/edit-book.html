@@ -1,88 +1,288 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Book</title>
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <title>Add Book</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="css/admin/add-book.css" rel="stylesheet">
+    <style>
+        .tag-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .badge {
+            display: flex;
+            align-items: center;
+        }
+
+        .badge .btn-close {
+            margin-left: 0.5rem;
+            font-size: 0.7rem;
+        }
+
+        #pdfFileSize {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        .input-group .select2-container {
+            flex: 1 1 auto;
+        }
+
+        .input-group .select2-selection {
+            height: 100%;
+        }
+
+        .input-group button {
+            height: 100%;
+        }
+
+        .form-container {
+            background-color: #f8f9fa;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+
+        @media (min-width: 768px) {
+            .author-tag-container {
+                display: flex;
+                gap: 1rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="container mt-4">
-        <!-- Edit Book Form -->
-        <form action="/books/edit-book/{id}" method="post" enctype="multipart/form-data">
-            <div class="mb-3">
-                <label for="title" class="form-label">Title</label>
-                <input type="text" id="title" name="title" class="form-control" th:value="${book.title}" required>
-            </div>
-            <div class="mb-3">
-                <label for="price" class="form-label">Price</label>
-                <input type="number" id="price" name="price" class="form-control" th:value="${book.price}" required>
-            </div>
-            <div class="mb-3">
-                <label for="coverImageFile" class="form-label">Cover Image</label>
-                <input type="file" id="coverImageFile" name="coverImageFile" class="form-control" required>
-            </div>
+    <th:block th:replace="~{/admin/fragments/navbar :: nav}" ></th:block>
 
-            <!-- Author Section -->
-            <div class="mb-3">
-                <label for="authors" class="form-label">Authors</label>
-                <div id="authors">
-                    <!-- Existing Authors -->
-                    <div th:each="author : ${book.authors}">
-                        <input type="text" name="authors" class="form-control mb-2" th:value="${author.name}" required>
-                    </div>
-                    <!-- New Author Input -->
-                    <input type="text" id="newAuthor" class="form-control">
-                    <button type="button" class="btn btn-primary mt-2" onclick="addAuthor()">Add Author</button>
+    <div class="container container-custom">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="form-container">
+                    <h2 class="mb-4">Add Book</h2>
+						<form th:action="@{'/admin/books/edit/' + ${book.id}}" method="post" enctype="multipart/form-data">
+						    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+						    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+						
+						    <input type="hidden" name="bookId" th:value="${book.id}">
+						
+						    <div class="mb-3 row">
+						        <div class="col-md-6">
+						            <label for="coverImageFile" class="form-label">Cover Image:</label>
+							            <div class="input-group">
+							                <input type="file" class="form-control" id="coverImageFile" name="coverImageFile" accept=".jpg, .jpeg, .png, .gif" onchange="handleFileInput(this)">
+							            </div>
+						        </div>
+						        <div class="col-md-6">
+						            <img id="coverPreview" class="avatar-preview img-thumbnail" alt="Cover Image Preview" th:if="${not #strings.isEmpty(book.coverImage)}" th:src="@{'/images/books/covers/' + ${book.coverImage}}" style="max-width: 200px; max-height: 200px;">
+						            <img id="defaultCoverImage" class="avatar-preview img-thumbnail" alt="Default Cover Image Preview" src="/images/books/covers/default/default.png" th:unless="${not #strings.isEmpty(book.coverImage)}" style="max-width: 200px; max-height: 200px;">
+						        </div>
+						    </div>
+						
+						    <div class="row mb-3">
+						        <div class="col-md-8">
+						            <label for="title" class="form-label">Title:</label>
+						            <input type="text" class="form-control" id="title" name="title" th:value="${book.title}" required>
+						        </div>
+						        <div class="col-md-4">
+						            <label for="price" class="form-label">Price:</label>
+						            <input type="number" class="form-control" id="price" name="price" step="0.1" min="0" th:value="${book.price}" required>
+						        </div>
+						    </div>
+						    <div class="mb-3">
+						        <label for="description" class="form-label">Description:</label>
+						        <textarea class="form-control" id="description" name="description" rows="3" th:text="${book.description}"></textarea>
+						    </div>
+						
+						    <div th:if="${book.pdfPath}">
+								<input type="hidden" name="existingPdfFile" th:value="${book.pdfPath}" />
+						    </div>
+						    <div class="mb-3">
+						        <label for="pdfFile" class="form-label">PDF File:</label>
+						        <input type="file" class="form-control" id="pdfFile" name="pdfFile" accept=".pdf" onchange="handlePdfFileInput(this)">
+						        <span id="pdfFileSize"></span>
+						    </div>
+												
+						    <div class="author-tag-container">
+						        <div class="mb-3 flex-grow-1">
+						            <label for="selectedAuthors">Authors:</label>
+						            <div class="input-group">
+						                <select id="selectedAuthors" class="form-select" multiple>
+						                    <option th:each="author : ${authors}" th:value="${author.id}" th:text="${author.name}" th:selected="${book.authors.contains(author)}"></option>
+						                </select>
+						                <button type="button" class="btn btn-outline-secondary" onclick="addAuthor()">+</button>
+						            </div>
+						            <div id="selectedAuthorsTags" class="tag-container">
+						                <span th:each="author : ${book.authors}" class="badge bg-primary">
+						                    <span th:text="${author.name}">Author Name</span>
+						                    <button type="button" class="btn-close" aria-label="Close" onclick="removeAuthor(this)"></button>
+						                </span>
+						            </div>
+						            <a href="/admin/authors/add" class="ms-2 btn btn-outline-secondary mt-2 d-block">Add new author</a>
+						        </div>
+						
+						        <div class="mb-3 flex-grow-1">
+						            <label for="selectedTags">Tags:</label>
+						            <div class="input-group">
+						                <select id="selectedTags" class="form-select" multiple>
+						                    <option th:each="tag : ${tags}" th:value="${tag.id}" th:text="${tag.name}" th:selected="${book.tags.contains(tag)}"></option>
+						                </select>
+						                <button type="button" class="btn btn-outline-secondary" onclick="addTag()">
+						                    <i class="bi bi-plus"></i>
+						                </button>
+						            </div>
+						            <div id="selectedTagsTags" class="tag-container">
+						                <span th:each="tag : ${book.tags}" class="badge bg-primary">
+						                    <span th:text="${tag.name}">Tag Name</span>
+						                    <button type="button" class="btn-close" aria-label="Close" onclick="removeTag(this)"></button>
+						                </span>
+						            </div>
+						            <a href="/admin/tags/add" class="ms-2 btn btn-outline-secondary mt-2 d-block">Add new tag</a>
+						        </div>
+						    </div>
+						
+						    <button type="submit" class="btn btn-primary">Save Changes</button>
+						    <a th:href="@{/admin/books/book-list}" class="btn btn-secondary">Cancel</a>
+						</form>
+
                 </div>
             </div>
-
-            <!-- Tag Section -->
-            <div class="mb-3">
-                <label for="tags" class="form-label">Tags</label>
-                <div id="tags">
-                    <!-- Existing Tags -->
-                    <select name="tags" class="form-select mb-2">
-                        <option th:each="tag : ${availableTags}" th:value="${tag.id}" th:text="${tag.name}"></option>
-                    </select>
-                    <!-- New Tag Input -->
-                    <input type="text" id="newTag" class="form-control">
-                    <button type="button" class="btn btn-primary mt-2" onclick="addTag()">Add Tag</button>
-                </div>
-            </div>
-
-            <button type="submit" class="btn btn-primary">Save Changes</button>
-            <a href="/books/book-list" class="btn btn-secondary">Back to Book List</a>
-        </form>
+        </div>
     </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
-        function addTag() {
-            var newTag = $("#newTag").val();
-            if (newTag !== "") {
-                $("#tags").append('<div><span class="badge bg-primary">' + newTag + '</span>' +
-                    '<button type="button" class="btn btn-sm btn-danger" onclick="removeTag(this)">Remove</button>' +
-                    '<input type="hidden" name="newTags" value="' + newTag + '"></div>');
-                $("#newTag").val("");
+        $(document).ready(function() {
+            $('#selectedAuthors').select2();
+            $('#selectedTags').select2();
+        });
+        document.addEventListener('DOMContentLoaded', function() {
+            var coverImageInput = document.getElementById('coverImageFile');
+            var pdfFileInput = document.getElementById('pdfFile');
+
+            var coverImagePath = coverImageInput.value;
+            if (coverImagePath) {
+                var coverPreview = document.getElementById('coverPreview');
+                coverPreview.src = coverImagePath;
+            }
+
+            var pdfFileName = pdfFileInput.value;
+            if (pdfFileName) {
+                var pdfFileSizeElement = document.getElementById('pdfFileSize');
+                pdfFileSizeElement.textContent = 'File selected: ' + pdfFileName;
+            }
+        });
+
+        function handleFileInput(input) {
+            var file = input.files[0];
+            var coverPreview = document.getElementById('coverPreview');
+
+            if (file) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    coverPreview.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                coverPreview.src = '/images/books/covers/default/default.png';
+            }
+        }
+        function handlePdfFileInput(input) {
+            var file = input.files[0];
+            var fileSizeElement = document.getElementById('pdfFileSize');
+            if (file) {
+                var sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
+                fileSizeElement.textContent = 'File size: ' + sizeInMB + ' MB';
+            } else {
+                fileSizeElement.textContent = '';
             }
         }
 
-        function removeTag(button) {
-            $(button).parent().remove();
+        function createTagElement(text, onRemove) {
+            var tag = document.createElement('div');
+            tag.classList.add('badge', 'bg-primary');
+            tag.textContent = text;
+
+            var removeButton = document.createElement('button');
+            removeButton.classList.add('btn-close', 'ms-2');
+            removeButton.setAttribute('type', 'button');
+            removeButton.setAttribute('aria-label', 'Close');
+            removeButton.addEventListener('click', onRemove);
+
+            tag.appendChild(removeButton);
+            return tag;
         }
 
         function addAuthor() {
-            var newAuthor = $("#newAuthor").val();
-            if (newAuthor !== "") {
-                $("#authors").append('<input type="text" name="authors" class="form-control mb-2" value="' + newAuthor + '" required>');
-                $("#newAuthor").val("");
+            var select = document.getElementById('selectedAuthors');
+            var container = document.getElementById('selectedAuthorsTags');
+            var selectedOption = select.options[select.selectedIndex];
+            var selectedAuthors = document.getElementsByName('selectedAuthors')[0] || document.createElement('select');
+            selectedAuthors.setAttribute('name', 'selectedAuthors');
+            selectedAuthors.setAttribute('multiple', 'multiple');
+            selectedAuthors.style.display = 'none';
+
+            if (!selectedAuthors.parentElement) {
+                document.querySelector('form').appendChild(selectedAuthors);
             }
+
+            var alreadySelected = Array.from(selectedAuthors.options).some(option => option.value == selectedOption.value);
+            if (alreadySelected) {
+                return;
+            }
+
+            var hiddenOption = document.createElement('option');
+            hiddenOption.value = selectedOption.value;
+            hiddenOption.text = selectedOption.text;
+            hiddenOption.selected = true;
+            selectedAuthors.appendChild(hiddenOption);
+
+            var tag = createTagElement(selectedOption.text, function() {
+                container.removeChild(tag);
+                hiddenOption.remove();
+            });
+
+            container.appendChild(tag);
+        }
+
+        function addTag() {
+            var select = document.getElementById('selectedTags');
+            var container = document.getElementById('selectedTagsTags');
+            var selectedOption = select.options[select.selectedIndex];
+            var selectedTags = document.getElementsByName('selectedTags')[0] || document.createElement('select');
+            selectedTags.setAttribute('name', 'selectedTags');
+            selectedTags.setAttribute('multiple', 'multiple');
+            selectedTags.style.display = 'none';
+
+            if (!selectedTags.parentElement) {
+                document.querySelector('form').appendChild(selectedTags);
+            }
+
+            var alreadySelected = Array.from(selectedTags.options).some(option => option.value == selectedOption.value);
+            if (alreadySelected) {
+                return;
+            }
+
+            var hiddenOption = document.createElement('option');
+            hiddenOption.value = selectedOption.value;
+            hiddenOption.text = selectedOption.text;
+            hiddenOption.selected = true;
+            selectedTags.appendChild(hiddenOption);
+
+            var tag = createTagElement(selectedOption.text, function() {
+                container.removeChild(tag);
+                hiddenOption.remove();
+            });
+
+            container.appendChild(tag);
         }
     </script>
 </body>

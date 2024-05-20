@@ -4,114 +4,139 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Book Catalog</title>
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    
 </head>
 <body>
+    <th:block th:replace="~{/admin/fragments/navbar :: nav}"></th:block>
 
-<div class="container mt-4">
-    <!-- Form Tìm Kiếm và Filter -->
-    <div class="mb-3">
-        <input type="text" id="author" class="form-control" placeholder="Enter author name">
-        <button class="btn btn-primary" onclick="searchByAuthor()">Search</button>
+    <div class="container mt-4">
+        <div class="row mb-3">
+            <div class="col-md-auto">
+                <input type="text" id="author" class="form-control" placeholder="Enter author name">
+            </div>
+            <div class="col-md-auto">
+                <button class="btn btn-primary" onclick="searchByAuthor()">Search</button>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-auto">
+                <select id="sortOption" class="form-select">
+                    <option value="title">Sort by Title</option>
+                    <option value="price">Sort by Price</option>
+                </select>
+            </div>
+            <div class="col-md-auto">
+                <button class="btn btn-primary" onclick="sortBy()">Sort</button>
+            </div>
+        </div>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Authors</th>
+                    <th>Tags</th>
+                    <th>Price</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="bookTable">
+                <tr th:each="book : ${books}">
+                    <td th:text="${book.id}">ID</td>
+                    <td th:text="${book.title}">Title</td>
+                    <td>
+                        <ul>
+                            <li th:each="author : ${book.authors}" th:text="${author.name}"></li>
+                        </ul>
+                    </td>
+                    <td>
+                        <ul>
+                            <li th:each="tag : ${book.tags}" th:text="${tag.name}"></li>
+                        </ul>
+                    </td>
+                    <td th:text="${book.price}">Price</td>
+                    <td>
+                        <a th:href="@{'/admin/books/edit/' + ${book.id}}" class="btn btn-primary me-2">
+                            <i class="bi bi-pencil-square"></i>
+                        </a>
+                        <a th:href="@{'/pdfs/' + ${book.pdfPath}}" class="btn btn-info me-2">
+                            <i class="bi bi-book"></i>
+                        </a>
+                        <button class="btn btn-danger" onclick="deleteBook('${book.id}')">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="text-center">
+            <a th:href="@{/admin/books/add}" class="btn btn-success">Add Book</a>
+        </div>
+<nav aria-label="Page navigation" class="mt-4 d-flex justify-content-center" th:if="${totalPages > 1 && not #lists.isEmpty(books)}">
+    <ul class="pagination justify-content-center">
+        <li class="page-item">
+            <a class="page-link" href="#" onclick="goToPage(1)" th:class="${currentPage == 1 || totalPages == 0 ? 'disabled' : ''}">First</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="#" th:if="${currentPage > 1}" th:attr="onclick='goToPage(' + (${currentPage - 1}) + ')'" th:class="${currentPage == 1 || totalPages == 0 ? 'disabled' : ''}">Previous</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="#" th:if="${currentPage < totalPages && totalPages > 1}" th:attr="onclick='goToPage(' + (${currentPage + 1}) + ')'" >Next</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="#" th:if="${totalPages > 1}" th:attr="onclick='goToPage(' + (${totalPages}) + ')'" th:class="${currentPage == totalPages || totalPages == 0 ? 'disabled' : ''}">Last</a>
+        </li>
+    </ul>
+</nav>
+
+
+
+
+
+
     </div>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    
+    <script th:inline="javascript">
+        var currentPage = /*[[${currentPage}]]*/ 0;
+        var totalPages = /*[[${totalPages}]]*/ 0;
+        var prevPage = currentPage - 1;
+        var nextPage = currentPage + 1;
+        var lastPage = totalPages - 1;
 
-    <div class="mb-3">
-        <select id="sortOption" class="form-select">
-            <option value="title">Sort by Title</option>
-            <option value="price">Sort by Price</option>
-        </select>
-        <button class="btn btn-primary" onclick="sortBy()">Sort</button>
-    </div>
+        function searchByAuthor() {
+            var author = $("#author").val();
+            $.get("/admin/books?page=" + currentPage + "&author=" + author, function(data) {
+                $("#bookTable").html(data);
+            });
+        }
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Title</th>
-                <th>Authors</th>
-                <th>Tags</th>
-                <th>Price</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody id="bookTable">
-            <tr th:each="book : ${books}">
-                <td th:text="${book.title}">Title</td>
-                <td>
-                    <ul>
-                        <li th:each="author : ${book.authors}" th:text="${author.name}"></li>
-                        <!-- CRUD Inline cho Author -->
-                        <li><a href="#" class="btn btn-info btn-sm">Edit</a></li>
-                        <li><a href="#" class="btn btn-danger btn-sm">Delete</a></li>
-                    </ul>
-                </td>
-                <td>
-                    <ul>
-                        <li th:each="tag : ${book.tags}" th:text="${tag.name}"></li>
-                        <!-- CRUD Inline cho Tag -->
-                        <li><a href="#" class="btn btn-info btn-sm">Edit</a></li>
-                        <li><a href="#" class="btn btn-danger btn-sm">Delete</a></li>
-                    </ul>
-                </td>
-                <td th:text="${book.price}">Price</td>
-                <td>
-                    <a th:href="@{'/admin/books/edit-book/' + ${book.id}}" class="btn btn-info">Edit</a>
-                    <button class="btn btn-danger" onclick="deleteBook('${book.id}')">Delete</button>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+        function sortBy() {
+            var sortOption = $("#sortOption").val();
+            $.get("/admin/books?page=" + currentPage + "&sort=" + sortOption, function(data) {
+                $("#bookTable").html(data);
+            });
+        }
 
-    <div class="text-center">
-        <a href="/admin/books/add-book" class="btn btn-success">Add Book</a>
-    </div>
+        function goToPage(page) {
+            if (totalPages > 0 && currentPage >= 0 && currentPage <= lastPage) {
+                currentPage = page;
+                $.get("/admin/books?page=" + currentPage, function(data) {
+                    $("#bookTable").html(data);
+                });
+            }
+        }
 
-    <!-- Phân Trang -->
-    <nav aria-label="Page navigation">
-        <ul class="pagination">
-            <li class="page-item"><a class="page-link" href="#" onclick="goToPage(0)">First</a></li>
-            <li class="page-item"><a class="page-link" href="#" onclick="goToPage(prevPage)">Previous</a></li>
-            <li class="page-item"><a class="page-link" href="#" onclick="goToPage(nextPage)">Next</a></li>
-            <li class="page-item"><a class="page-link" href="#" onclick="goToPage(lastPage)">Last</a></li>
-        </ul>
-    </nav>
-</div>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-
-<script th:inline="javascript">
-    var currentPage = /*[[${currentPage}]]*/ 0;
-    var totalPages = /*[[${totalPages}]]*/ 0;
-    var prevPage = currentPage - 1;
-    var nextPage = currentPage + 1;
-    var lastPage = totalPages - 1;
-
-    function searchByAuthor() {
-        var author = $("#author").val();
-        $.get("/admin/books?page=" + currentPage + "&author=" + author, function(data) {
-            $("#bookTable").html(data);
-        });
-    }
-
-    function sortBy() {
-        var sortOption = $("#sortOption").val();
-        $.get("/admin/books?page=" + currentPage + "&sort=" + sortOption, function(data) {
-            $("#bookTable").html(data);
-        });
-    }
-
-    function goToPage(page) {
-        currentPage = page;
-        $.get("/admin/books?page=" + currentPage, function(data) {
-            $("#bookTable").html(data);
-        });
-    }
-
-    function deleteBook(bookId) {
-        console.log("Deleting book with ID: " + bookId);
-    }
-</script>
-
+        function deleteBook(bookId) {
+            console.log("Deleting book with ID: " + bookId);
+        }
+    </script>
 </body>
 </html>

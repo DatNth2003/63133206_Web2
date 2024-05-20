@@ -18,7 +18,7 @@ public class SecurityConfig {
         http
             .authorizeRequests()
                 .requestMatchers("/").permitAll()
-                .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
+                .requestMatchers("/css/**", "/js/**", "/images/**", "/pdfs/**").permitAll()
                 .requestMatchers("/account/register/**").permitAll()
                 .requestMatchers("/account/login/**").permitAll()
                 .requestMatchers("/account/forgot-password/**").permitAll()
@@ -26,13 +26,12 @@ public class SecurityConfig {
                 .requestMatchers("/account/profile").permitAll()
                 .requestMatchers("register","forgotPassword","resetPassword/**", "resetPassword").permitAll()
                 .requestMatchers("/account/profile").authenticated()
-                .requestMatchers("/admin/**").hasRole("ADMIN")
+                .requestMatchers("/admin/**").permitAll()
                 .anyRequest().permitAll()
             .and()
             .formLogin(formLogin ->
             formLogin
                 .loginPage("/account/login")
-                .defaultSuccessUrl("/",true)
                 .permitAll()
         )
         .logout(logout ->

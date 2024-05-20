@@ -32,7 +32,7 @@ public class RoleService {
         return roleRepository.findById(id);
     }
     public Role getRoleByName(String name) {
-        Role role = roleRepository.findFirstByName(name);
+        Role role = roleRepository.findByName(name);
         if (role == null) {
             throw new IllegalArgumentException("Role with name '" + name + "' not found.");
         }

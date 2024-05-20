@@ -7,6 +7,6 @@ import com.ntd63133206.bookbuddy.model.Role;
 
 @Repository
 public interface RoleRepository extends JpaRepository<Role, Long> {
-    Role findFirstByName(String name);
+    Role findByName(String name);
 
 }

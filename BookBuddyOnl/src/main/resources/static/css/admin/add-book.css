@@ -1,6 +1,6 @@
 .container-custom {
-            border: 1px solid #dee2e6;
-            border-radius: 10px;
+		border: 1px solid #dee2e6;
+		border-radius: 10px;
             padding: 20px;
             margin-top: 50px;
         }
@@ -31,7 +31,6 @@
         .invalid-input {
             border-color: #dc3545 !important;
         }
-        /* Custom CSS for tags and authors */
         .tag-item, .author-item {
             display: inline-block;
             background-color: #f0f0f0;

@@ -21,6 +21,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.List;
 
 @Controller
 @RequestMapping("/admin/authors")
@@ -30,7 +31,12 @@ public class AuthorController {
 
     @Autowired
     private AuthorService authorService;
-
+    @GetMapping("/authors")
+    public String listAuthors(Model model) {
+        List<Author> authors = authorService.findAll();
+        model.addAttribute("authors", authors);
+        return "admin/authors/author-list";
+    }
     @GetMapping("/")
     public String viewAuthorList(Model model,
                                  @RequestParam(name = "keyword", required = false, defaultValue = "") String keyword,
@@ -50,15 +56,18 @@ public class AuthorController {
         model.addAttribute("totalPages", authorsPage.getTotalPages());
         model.addAttribute("keyword", keyword);
 
-        return "admin/authors/author-list";
+        return "admin/authors/list";
     }
 
-
-    @PostMapping("/authors/search")
+    @PostMapping("/search")
     public String searchAuthors(@RequestParam(name = "keyword", required = false) String keyword,
                                 RedirectAttributes redirectAttributes) {
-        return "redirect:/admin/authors/?keyword=" + keyword;
+        if (keyword != null && !keyword.isEmpty()) {
+            redirectAttributes.addAttribute("keyword", keyword);
+        }
+        return "redirect:/admin/authors/";
     }
+
 
 
     @GetMapping("/add")
@@ -69,27 +78,26 @@ public class AuthorController {
 
     @PostMapping("/add")
     public String addAuthor(@ModelAttribute("author") @Valid Author author,
-                            @RequestParam("authorImage") MultipartFile authorImage,
+                            @RequestParam("avatarFile") MultipartFile avatarFile,
                             BindingResult bindingResult,
-                            RedirectAttributes redirectAttributes) {
+                            RedirectAttributes redirectAttributes,
+                            Model model) {
         try {
-            // Kiểm tra lỗi validation của đối tượng Author
             if (bindingResult.hasErrors()) {
-                // Xử lý lỗi ở đây nếu cần
+                bindingResult.getAllErrors().forEach(error -> System.out.println(error.getDefaultMessage()));
+
+                model.addAttribute("errorMessage", "Lỗi validation xảy ra, vui lòng kiểm tra lại thông tin nhập.");
                 return "admin/authors/add-author";
             }
 
-            if (authorImage != null && !authorImage.isEmpty()) {
-                // Lưu ảnh và cập nhật đường dẫn ảnh trong đối tượng Author
-                String fileName = authorService.saveAuthorImage(authorImage);
+            if (avatarFile != null && !avatarFile.isEmpty()) {
+                String fileName = authorService.saveAuthorImage(avatarFile);
                 author.setAuthorImage(fileName);
             } else {
-                // Sử dụng ảnh mặc định nếu không có ảnh được chọn
                 String defaultAvatarPath = "default/default-avatar.jpg";
                 author.setAuthorImage(defaultAvatarPath);
             }
 
-            // Lưu thông tin tác giả vào cơ sở dữ liệu
             authorService.save(author);
             redirectAttributes.addFlashAttribute("successMessage", "Đã thêm tác giả thành công.");
         } catch (Exception e) {
@@ -98,6 +106,8 @@ public class AuthorController {
         }
         return "redirect:/admin/authors";
     }
+
+
 
 
     

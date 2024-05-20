@@ -32,8 +32,13 @@ import com.ntd63133206.bookbuddy.model.Role;
 import com.ntd63133206.bookbuddy.service.CustomUserDetailsService;
 import com.ntd63133206.bookbuddy.service.EmailService;
 import com.ntd63133206.bookbuddy.service.UserService;
+import com.ntd63133206.bookbuddy.util.EmailUtils;
 import com.ntd63133206.bookbuddy.util.Utility;
 
+import jakarta.mail.Session;
+import jakarta.mail.Transport;
+import jakarta.mail.Authenticator;
+import jakarta.mail.PasswordAuthentication;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,6 +53,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.Properties;
 import java.util.UUID;
 import java.util.Set;
 import net.bytebuddy.utility.RandomString;
@@ -90,8 +96,8 @@ public class AccountController {
         }
 
         try {
-        	if (avatarFile == null || avatarFile.isEmpty()) {
-                String defaultAvatarPath = "/images/default/default-avatar.jpg";
+            if (avatarFile == null || avatarFile.isEmpty()) {
+                String defaultAvatarPath = "default/default-avatar.jpg";
                 user.setAvatar(defaultAvatarPath);
             }
             userService.registerUser(user, avatarFile);
@@ -103,6 +109,7 @@ public class AccountController {
             return "redirect:/account/register";
         }
     }
+
 
     @GetMapping("/login")
     public String showLoginForm(Authentication authentication) {
@@ -119,7 +126,7 @@ public class AccountController {
         try {
             customUserDetails = (CustomUserDetails) customUserDetailsService.loadUserByUsername(user.getUsername());
             if (customUserDetails != null) {
-                System.out.println("CustomUserDetails: " + customUserDetails.getAvatar());
+                System.out.println("Load ảnh: " + customUserDetails.getAvatar());
                 model.addAttribute("authentication", customUserDetails);
 
                 boolean isAdmin = customUserDetails.getAuthorities().stream()
@@ -132,51 +139,33 @@ public class AccountController {
                 }
             } else {
                 System.out.println("CustomUserDetails is null!");
-                model.addAttribute("errorMessage", "Không thể đăng nhập. Vui lòng thử lại sau.");
-                return "redirect:/account/login?error";
+                model.addAttribute("errorMessage", "Tên người dùng hoặc mật khẩu không chính xác!");
+                return "account/login";
             }
         } catch (UsernameNotFoundException e) {
             System.out.println("Tên người dùng không tồn tại.");
-
-            model.addAttribute("errorMessage", "Tên người dùng không tồn tại.");
-            return "redirect:/account/login?error";
+            model.addAttribute("errorMessage", "Tên người dùng hoặc mật khẩu không chính xác!");
+            return "account/login";
         }
     }
 
 
-
-
-
-
     @GetMapping("/profile")
     public String showEditProfileForm(Model model, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        String username = customUserDetails.getUsername();
-        System.out.println("Username retrieved from CustomUserDetails: " + username);
-
         User user = customUserDetails.getUser();
-        if (user != null) {
-            System.out.println("User retrieved successfully: " + user.toString());
-        } else {
-            System.out.println("User not found for username: " + username);
-        }
-
         model.addAttribute("user", user);
         return "account/profile";
     }
 
     @PostMapping("/profile")
-    public String updateProfile(@RequestParam("username") String username,
-                                @RequestParam("avatarFile") MultipartFile avatarFile,
-                                @AuthenticationPrincipal CustomUserDetails customUserDetails,
-                                RedirectAttributes redirectAttributes) {
+    public String updateProfile(@ModelAttribute("user") User user, @RequestParam("avatarFile") MultipartFile avatarFile, RedirectAttributes redirectAttributes) {
         try {
-            userService.updateProfile(customUserDetails.getUsername(), username, avatarFile);
+            userService.updateProfile(user.getUsername(), user.getUsername(), avatarFile);
             redirectAttributes.addFlashAttribute("successMessage", "Thông tin cá nhân đã được cập nhật thành công.");
         } catch (IOException e) {
             e.printStackTrace();
             redirectAttributes.addFlashAttribute("errorMessage", "Không thể cập nhật thông tin cá nhân. Vui lòng thử lại sau.");
         }
-
         return "redirect:/account/profile";
     }
 
@@ -187,7 +176,6 @@ public class AccountController {
         return "account/forgot-password";
     }
 
-
     @PostMapping("/forgot-password")
     public String processForgotPassword(HttpServletRequest request, Model model) {
         String email = request.getParameter("email");
@@ -197,7 +185,6 @@ public class AccountController {
             if (userService.existsByEmail(email)) {
                 userService.updateResetPasswordToken(token, email);
                 String resetPasswordLink = Utility.getSiteURL(request) + "/reset-password?token=" + token;
-                // Gửi email và kiểm tra kết quả
                 if (sendEmail(email, resetPasswordLink)) {
                     model.addAttribute("message", "We have sent a reset password link to your email. Please check.");
                 } else {
@@ -218,31 +205,42 @@ public class AccountController {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            Properties properties = new Properties();
+            properties.put("mail.smtp.auth", "true");
+            properties.put("mail.smtp.starttls.enable", "true");
+            properties.put("mail.smtp.host", "smtp.gmail.com");
+            properties.put("mail.smtp.port", "587");
+            properties.put("mail.smtp.username", "bookbuddy@gmail.com");
+            properties.put("mail.smtp.password", "NgoThanhDat2003");
 
+            Authenticator authenticator = new Authenticator() {
+                @Override
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication("bookbuddy@gmail.com", "NgoThanhDat2003");
+                }
+            };
+
+            // Sử dụng Authenticator để xác thực khi gửi email
+            Session session = Session.getInstance(properties, authenticator);
+
+            // Tiếp tục với việc thiết lập thông tin email và gửi email như bạn đã làm trước đó
             helper.setFrom("bookbuddy@gmail.com", "BookBuddy Support");
             helper.setTo(recipientEmail);
-
             String subject = "Here's the link to reset your password";
-
-            String content = "<p>Hello,</p>"
-                    + "<p>You have requested to reset your password.</p>"
-                    + "<p>Click the link below to change your password:</p>"
-                    + "<p><a href=\"" + link + "\">Change my password</a></p>"
-                    + "<br>"
-                    + "<p>Ignore this email if you do remember your password, or you have not made the request.</p>";
-
+            String content = EmailUtils.getEmailMessage("", link);
             helper.setSubject(subject);
             helper.setText(content, true);
-            mailSender.send(message);
 
-            // Gửi email thành công
+            // Gửi email
+            Transport.send(message);
+
             return true;
         } catch (Exception e) {
-            // Gửi email thất bại, ghi log hoặc xử lý lỗi tại đây
             System.out.println("Failed to send email: " + e.getMessage());
             return false;
         }
     }
+
 
 
 	@GetMapping("/reset-password")

@@ -4,104 +4,130 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-        .dashboard {
-            flex: 1;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 40px;
-        }
-        .cards {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-        .card {
-            background-color: #f0f0f0;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            padding: 20px;
-            flex: 1 1 calc(33.333% - 40px);
-            box-sizing: border-box;
-        }
-        .online-users {
-            margin-top: 20px;
-        }
-        .online-users h2 {
-            margin-bottom: 20px;
-        }
-        .user {
-            background-color: #fff;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 10px;
-            margin-bottom: 10px;
-        }
-        .user p {
-            margin: 5px 0;
-        }
-    </style>
+	    body {
+	        font-family: Arial, sans-serif;
+	        margin: 0;
+	        padding: 0;
+	    }
+	    .dashboard {
+	        flex: 1;
+	        padding: 20px;
+	        display: flex;
+	        flex-direction: column;
+	        gap: 40px;
+	    }
+	    .cards {
+	        display: flex;
+	        flex-wrap: wrap;
+	        gap: 20px;
+	    }
+	    .card {
+	        background-color: #f0f0f0;
+	        border-radius: 8px;
+	        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+	        padding: 10px;
+	        flex: 1 1 calc(33.333% - 40px);
+	        box-sizing: border-box;
+	    }
+	    .online-users {
+	        margin-top: 20px;
+	    }
+	    .online-users h2 {
+	        margin-bottom: 20px;
+	    }
+	    .user-cards {
+	        display: grid;
+	        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+	        gap: 15px;
+	    }
+	    .user-card {
+	        background-color: #fff;
+	        border: 1px solid #ddd;
+	        border-radius: 8px;
+	        padding: 10px;
+	        text-align: center;
+	        position: relative;
+	    }
+	    .user-card img {
+	        border-radius: 50%;
+	        border: 2px solid #ddd;
+	        width: 80px;
+	        height: 80px;
+	        object-fit: cover;
+	        position: absolute;
+	        top: -40px;
+	        left: 50%;
+	        transform: translateX(-50%);
+	        background-color: #fff;
+	    }
+	    .user-card .card-body {
+	        margin-top: 40px;
+	    }
+	    .user-card p {
+	        margin: 5px 0;
+	    }
+	    .function-icon {
+	        font-size: 24px;
+	        margin-right: 10px;
+	    }
+	    .view-details-btn {
+	        margin-top: 10px;
+	        display: inline-block;
+	    }
+	</style>
+
 </head>
 <body>
-	<th:block th:replace="~{/admin/fragments/navbar :: nav}" ></th:block>
-    <div class="container mt-5">
-    
+    <th:block th:replace="~{/admin/fragments/navbar :: nav}"></th:block>
+    <div class="container p-0 m-0">
         <div class="row">
-            <div class="col col-md-3">
+            <div class="col col-md-2">
                 <th:block th:replace="~{/admin/fragments/sidebar :: main}"></th:block>
             </div>
-            
-            <div class="col col-md-9">
+            <div class="col col-md-10">
                 <section class="dashboard">
                     <div class="cards">
                         <div class="card">
-                            <h3>Users Manage</h3>
-                            <p>Description of Card 1.</p>
+                            <h3><i class="bi bi-people function-icon"></i> Users Management</h3>
+                            <p>Description of User Management.</p>
                         </div>
                         <div class="card">
-                            <h3>Book Manage</h3>
-                            <p>Description of Card 2.</p>
+                            <h3><i class="bi bi-book function-icon"></i> Book Management</h3>
+                            <p>Description of Book Management.</p>
                         </div>
                         <div class="card">
-                            <h3>Author Manage</h3>
-                            <p>Description of Card 3.</p>
+                            <h3><i class="bi bi-person function-icon"></i> Author Management</h3>
+                            <p>Description of Author Management.</p>
                         </div>
                     </div>
-                   <div class="online-users" th:if="${not #lists.isEmpty(usersPage)}">
-					    <h2>Recently Online Users</h2>
-					    <div class="card-group">
-					        <div th:each="user : ${usersPage}" class="card user-card">
-					            <img th:src="@{/uploads/images/users/{avatar}(avatar=${user.avatar})}" alt="User Image" class="card-img-top">
-					            <div class="card-body">
-					                <h5 class="card-title" th:text="${user.username}"></h5>
-					                <p class="card-text"><span th:text="${user.email}"></span></p>
-					                <p class="card-text"><span th:text="${#dates.format(user.lastLogin, 'yyyy-MM-dd HH:mm:ss')}"></span></p>
-					                <p class="card-text">
-					                    <span th:each="role : ${user.roles}" class="badge bg-info text-light mr-1" th:text="${role.name}"></span>
-					                </p>
-					            </div>
-					        </div>
-					    </div>
-					</div>
-
-
-					<div class="online-users" th:if="${#lists.isEmpty(usersPage)}">
-					    <h2>No Users Online</h2>
-					</div>
-
+                    <div class="online-users mb-5" th:if="${not #lists.isEmpty(usersPage)}">
+                        <h2>Recently Online Users</h2>
+                        <div class="user-cards mt-5">
+                            <div th:each="user : ${usersPage}" class="card user-card">
+                                <img th:src="@{${user.avatar} == null} ? '/images/users/avatars/default/default-avatar.jpg' : '/images/users/avatars/' + ${user.avatar}" alt="User Image">
+                                <div class="card-body">
+                                    <h5 class="card-title" th:text="${user.username}"></h5>
+                                    <p class="card-text"><span th:text="${user.email}"></span></p>
+                                    <p class="card-text"><span th:text="${#dates.format(user.lastLogin, 'yyyy-MM-dd HH:mm:ss')}"></span></p>
+                                    <p class="card-text">
+                                        <span th:each="role : ${user.roles}" class="badge bg-info text-light mr-1" th:text="${role.name}"></span>
+                                    </p>
+                                    <a th:href="@{/admin/users/edit/{id}(id=${user.id})}" class="btn btn-primary view-details-btn">Xem chi tiết</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="online-users" th:if="${#lists.isEmpty(usersPage)}">
+                        <h2>No Users Online</h2>
+                    </div>
                 </section>
             </div>
         </div>
     </div>
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
 </body>
 </html>

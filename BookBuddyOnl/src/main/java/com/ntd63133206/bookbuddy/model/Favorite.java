@@ -9,7 +9,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "favorite")
+@Table(name = "favorites")
 public class Favorite {
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

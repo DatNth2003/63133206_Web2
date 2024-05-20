@@ -5,9 +5,7 @@
     <title>Add User</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-    
-    <!-- Custom CSS -->
-    
+        
     <style>
         .container-custom {
             border: 1px solid #dee2e6;
@@ -55,85 +53,87 @@
     </style>
 </head>
 <body>
-<div class="container container-custom">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <h2 class="mb-4">Add User</h2>
-            <form action="#" th:action="@{/admin/users/add}" method="post" enctype="multipart/form-data">
-                <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
-                <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+    <th:block th:replace="~{/admin/fragments/navbar :: nav}" ></th:block>
 
-                <div class="mb-3 row align-items-center">
-                    <div class="col-auto">
-                        <label for="avatar" class="form-label">Avatar:</label>
-                        <input type="file" class="form-control" id="avatar" name="avatarFile" accept="image/*" onchange="handleFileInput(this)" required>
-                    </div>
-                    <div class="col-auto">
-                        <img id="avatarPreview" class="avatar-preview img-thumbnail" alt="Avatar Preview" src="/images/default/default-avatar.jpg">
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <label for="email" class="form-label">Email:</label>
-                    <input type="email" class="form-control" id="email" name="email" required>
-                    <small id="emailHelp" class="form-text text-muted validation-message">
-                        <span id="emailValidityIcon" class="bi bi-x text-danger"></span>
-                        <span id="emailValidityMessage" class="text-danger">Please enter a valid email address.</span>
-                    </small>
-                </div>
-
-                <div class="mb-3">
-                    <label for="username" class="form-label">Username:</label>
-                    <input type="text" class="form-control" id="username" name="username" required>
-                    <small id="usernameHelp" class="form-text text-muted validation-message">
-                        <span id="usernameValidityIcon" class="bi bi-x text-danger"></span>
-                        <span id="usernameValidityMessage" class="text-danger">Username must be between 8 and 50 characters.</span>
-                    </small>
-                </div>
-                <div class="mb-3">
-                    <label for="password" class="form-label">Password:</label>
-                    <div class="input-group">
-                        <input type="password" class="form-control" id="password" name="password" required>
-                        <span id="togglePassword" class="input-group-text" style="cursor: pointer;"><i class="bi bi-eye"></i></span>
-                    </div>
-                    <small id="passwordHelp" class="form-text text-muted validation-message">
-                        <span id="charLength" class="bi bi-x text-danger"></span> <span class="text-danger">At least 8 characters</span><br>
-                        <span id="upperCase" class="bi bi-x text-danger"></span> <span class="text-danger">At least 1 uppercase letter</span><br>
-                        <span id="number" class="bi bi-x text-danger"></span> <span class="text-danger">At least 1 number</span><br>
-                        <span id="specialChar" class="bi bi-x text-danger"></span> <span class="text-danger">At least 1 special character.</span><br>
-                    </small>
-                </div>
-                <div class="mb-3">
-                    <label for="confirmPassword" class="form-label">Confirm Password:</label>
-                    <div class="input-group">
-                        <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
-                        <span id="toggleConfirmPassword" class="input-group-text" style="cursor: pointer;"><i class="bi bi-eye"></i></span>
-                    </div>
-                    <small id="confirmPasswordHelp" class="form-text text-muted validation-message">
-                        <span id="confirmPasswordValidityIcon" class="bi bi-x text-danger"></span>
-                        <span id="confirmPasswordValidityMessage" class="text-danger">Password must match the above password.</span>
-                    </small>
-                </div>
-                <div class="mb-3">
-                    <label for="selectedRoles">Roles:</label>
-                    <div class="input-group">
-                        <select id="selectedRoles" class="form-select">
-                            <option th:each="role : ${roles}" th:value="${role.id}" th:text="${role.name}"></option>
-                        </select>
-                        <button type="button" class="btn btn-outline-secondary" onclick="addRole()">+</button>
-                    </div>
-                    <div id="selectedRolesTags" class="mt-2"></div>
-                </div>
-
-                <button type="submit" class="btn btn-primary">Add User</button>
-                <a th:href="@{/admin/users}" class="btn btn-secondary">Back to User List</a>
-            </form>
-        </div>
-    </div>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<script src="/js/user-form-validation.js"></script>
+	<div class="container container-custom">
+	    <div class="row justify-content-center">
+	        <div class="col-md-6">
+	            <h2 class="mb-4">Add User</h2>
+	            <form action="#" th:action="@{/admin/users/add}" method="post" enctype="multipart/form-data">
+	                <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+	                <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+	
+	                <div class="mb-3 row align-items-center">
+	                    <div class="col-auto">
+	                        <label for="avatar" class="form-label">Avatar:</label>
+	                        <input type="file" class="form-control" id="avatar" name="avatarFile" accept="image/*" onchange="handleFileInput(this)" required>
+	                    </div>
+	                    <div class="col-auto">
+	                        <img id="avatarPreview" class="avatar-preview img-thumbnail" alt="Avatar Preview" src="/images/default/default-avatar.jpg">
+	                    </div>
+	                </div>
+	                <div class="mb-3">
+	                    <label for="email" class="form-label">Email:</label>
+	                    <input type="email" class="form-control" id="email" name="email" required>
+	                    <small id="emailHelp" class="form-text text-muted validation-message">
+	                        <span id="emailValidityIcon" class="bi bi-x text-danger"></span>
+	                        <span id="emailValidityMessage" class="text-danger">Please enter a valid email address.</span>
+	                    </small>
+	                </div>
+	
+	                <div class="mb-3">
+	                    <label for="username" class="form-label">Username:</label>
+	                    <input type="text" class="form-control" id="username" name="username" required>
+	                    <small id="usernameHelp" class="form-text text-muted validation-message">
+	                        <span id="usernameValidityIcon" class="bi bi-x text-danger"></span>
+	                        <span id="usernameValidityMessage" class="text-danger">Username must be between 8 and 50 characters.</span>
+	                    </small>
+	                </div>
+	                <div class="mb-3">
+	                    <label for="password" class="form-label">Password:</label>
+	                    <div class="input-group">
+	                        <input type="password" class="form-control" id="password" name="password" required>
+	                        <span id="togglePassword" class="input-group-text" style="cursor: pointer;"><i class="bi bi-eye"></i></span>
+	                    </div>
+	                    <small id="passwordHelp" class="form-text text-muted validation-message">
+	                        <span id="charLength" class="bi bi-x text-danger"></span> <span class="text-danger">At least 8 characters</span><br>
+	                        <span id="upperCase" class="bi bi-x text-danger"></span> <span class="text-danger">At least 1 uppercase letter</span><br>
+	                        <span id="number" class="bi bi-x text-danger"></span> <span class="text-danger">At least 1 number</span><br>
+	                        <span id="specialChar" class="bi bi-x text-danger"></span> <span class="text-danger">At least 1 special character.</span><br>
+	                    </small>
+	                </div>
+	                <div class="mb-3">
+	                    <label for="confirmPassword" class="form-label">Confirm Password:</label>
+	                    <div class="input-group">
+	                        <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+	                        <span id="toggleConfirmPassword" class="input-group-text" style="cursor: pointer;"><i class="bi bi-eye"></i></span>
+	                    </div>
+	                    <small id="confirmPasswordHelp" class="form-text text-muted validation-message">
+	                        <span id="confirmPasswordValidityIcon" class="bi bi-x text-danger"></span>
+	                        <span id="confirmPasswordValidityMessage" class="text-danger">Password must match the above password.</span>
+	                    </small>
+	                </div>
+	                <div class="mb-3">
+	                    <label for="selectedRoles">Roles:</label>
+	                    <div class="input-group">
+	                        <select id="selectedRoles" class="form-select">
+	                            <option th:each="role : ${roles}" th:value="${role.id}" th:text="${role.name}"></option>
+	                        </select>
+	                        <button type="button" class="btn btn-outline-secondary" onclick="addRole()">+</button>
+	                    </div>
+	                    <div id="selectedRolesTags" class="mt-2"></div>
+	                </div>
+	
+	                <button type="submit" class="btn btn-primary">Add User</button>
+	                <a th:href="@{/admin/users}" class="btn btn-secondary">Back to User List</a>
+	            </form>
+	        </div>
+	    </div>
+	</div>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+	<script src="/js/user-form-validation.js"></script>
 
 </body>
 </html>

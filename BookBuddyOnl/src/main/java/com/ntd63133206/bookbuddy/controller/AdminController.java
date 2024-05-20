@@ -24,8 +24,8 @@ public class AdminController {
 
 	@GetMapping({"", "/", "/index"})
 	public String adminPage(Model model) {
-	    int page = 0; // trang đầu tiên
-	    int size = 10; // số lượng người dùng mỗi trang
+	    int page = 0;
+	    int size = 10;
 
 	    Pageable pageable = PageRequest.of(page, size);
 	    Page<User> usersPage = userRepository.findAllByOrderByLastLoginDesc(pageable);

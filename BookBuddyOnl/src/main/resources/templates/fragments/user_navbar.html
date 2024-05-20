@@ -9,7 +9,7 @@
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-light">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="#"><span>Book</span><span style="color: #ff8f00;">Buddy</span></a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggler"
@@ -28,16 +28,6 @@
                         <i class="bi bi-book"></i> Sách
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/link">
-                        <i class="bi bi-link-45deg"></i> Liên kết
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/disabled">
-                        <i class="bi bi-archive"></i> Tính năng bị vô hiệu hóa
-                    </a>
-                </li>
             </ul>
             <ul class="navbar-nav ml-auto">
                 <li sec:authorize="isAuthenticated()" class="nav-item dropdown">
@@ -45,8 +35,11 @@
 					data-bs-toggle="dropdown" aria-expanded="false">
 
                         <span th:text="${#authentication.name}"></span>
-                        <img th:src="${#authentication.principal.avatar != null ? '/images/users/avatars/' + #authentication.principal.avatar : '/images/default/default-avatar.jpg'}"
-                             th:alt="${#authentication.principal.avatar != null ? '/images/users/avatars/' + #authentication.principal.avatar : 'Ảnh đại diện mặc định'}" class="avatar rounded-circle" style="width: 30px; height: 30px;">
+                        <img th:src="${#authentication.principal.avatar != null ? '/images/users/avatars/' + #authentication.principal.avatar : 'default/default-avatar.jpg'}"
+     					th:alt="${#authentication.principal.avatar != null ? '/images/users/avatars/' + #authentication.principal.avatar : 'Ảnh đại diện mặc định'}"
+     					class="avatar rounded-circle" style="width: 30px; height: 30px;">
+
+
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="userNavbarDropdown">
     					<li><a class="dropdown-item" href="/account/profile"><i class="bi bi-person"></i> Profile</a></li>

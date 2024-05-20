@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,6 +27,8 @@ import com.ntd63133206.bookbuddy.service.AuthorService;
 import com.ntd63133206.bookbuddy.service.BookService;
 import com.ntd63133206.bookbuddy.service.TagService;
 
+import jakarta.validation.Valid;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -36,6 +40,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Controller
 @RequestMapping("/admin/books")
@@ -58,65 +64,57 @@ public class BookController {
     }
 
     @PostMapping("/add")
-    public String addBook(@ModelAttribute Book book,
-                          @RequestParam("coverImageFile") MultipartFile coverImage,
-                          @RequestParam("pdfFile") MultipartFile pdfFile,
-                          @RequestParam("selectedAuthors") List<Long> authorIds,
-                          @RequestParam("selectedTags") List<Long> tagIds,
-                          RedirectAttributes redirectAttributes) {
+    public String addBook(@ModelAttribute("book") @Valid Book book, 
+                          @RequestParam("coverImageFile") MultipartFile coverImage, 
+                          @RequestParam("pdfFile") MultipartFile pdfFile, 
+                          BindingResult bindingResult, Model model) {
+        if (bindingResult.hasErrors()) {
+        	 for (FieldError error : bindingResult.getFieldErrors()) {
+        	        System.out.println(error.getField() + ": " + error.getDefaultMessage());
+        	    }
+        	    model.addAttribute("errors", bindingResult.getAllErrors());
+        	    return "/admin/books/add-book";
+        }
         try {
-            for (Long authorId : authorIds) {
-                Optional<Author> authorOpt = authorService.findById(authorId);
-                authorOpt.ifPresent(author -> book.getAuthors().add(author));
-            }
-            
-            for (Long tagId : tagIds) {
-                Optional<Tag> tagOpt = tagService.findById(tagId);
-                tagOpt.ifPresent(tag -> book.getTags().add(tag));
-            }
-            
-            if (!coverImage.isEmpty()) {
-                String coverImagePath = saveCoverImage(coverImage);
-                book.setCoverImage(coverImagePath.getBytes());
-            }
-            if (!pdfFile.isEmpty()) {
-                byte[] pdfContent = pdfFile.getBytes();
-                book.setPdfContent(pdfContent);
-            }
-            bookService.save(book);
-
-            redirectAttributes.addFlashAttribute("successMessage", "Book added successfully.");
-            return "redirect:/admin/books/add";
+            bookService.addBook(book, coverImage, pdfFile);
+            return "redirect:/admin/books/";
         } catch (IOException e) {
             e.printStackTrace();
-            redirectAttributes.addFlashAttribute("errorMessage", "Error adding book. Please try again.");
-            return "redirect:/admin/books/add";
+            model.addAttribute("error", "An error occurred while uploading files.");
+            return "error";
         }
     }
+    @GetMapping("/edit/{id}")
+    public String showEditBookForm(@PathVariable("id") Long id, Model model) {
+        Book book = bookService.getBookById(id);
+        List<Author> authors = authorService.findAll();
+        List<Tag> tags = tagService.getAllTags();
+        model.addAttribute("book", book);
+        model.addAttribute("authors", authors);
+        model.addAttribute("tags", tags);
+        return "/admin/books/edit-book";
+    }
 
-    private String saveCoverImage(MultipartFile coverImage) throws IOException {
-
-        String uploadDir = "uploads/book-covers/";
-        String fileName = UUID.randomUUID().toString() + "_" + coverImage.getOriginalFilename();
-        Path uploadPath = Paths.get(uploadDir);
-
-        if (!Files.exists(uploadPath)) {
-            Files.createDirectories(uploadPath);
+    @PostMapping("/edit/{id}")
+    public String editBook(@PathVariable Long id, 
+                           @ModelAttribute Book book,
+                           @RequestParam("coverImageFile") MultipartFile coverImage, 
+                           @RequestParam("pdfFile") MultipartFile pdfFile, 
+                           Model model) {
+        try {
+            bookService.updateBookDetails(id, book, coverImage, pdfFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+            model.addAttribute("error", "An error occurred while uploading files.");
+            return "error";
         }
-
-        try (InputStream inputStream = coverImage.getInputStream()) {
-            Path filePath = uploadPath.resolve(fileName);
-            Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
-        }
-
-        return uploadDir + fileName;
+        return "redirect:/admin/books/";
     }
 
 
 
 
-
-    @GetMapping(value = {"/index", "/"})
+    @GetMapping(value = {"", "/"})
     public String getAllBooks(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -152,33 +150,15 @@ public class BookController {
     }
 
 
-
-    @GetMapping("/delete-book/{id}")
-    public String deleteBook(@PathVariable("id") Long id) {
-        bookService.deleteBook(id);
+    @GetMapping("/delete/{id}")
+    public String deleteBook(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
+        try {
+            bookService.deleteBookById(id);
+            redirectAttributes.addFlashAttribute("message", "Book deleted successfully");
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Failed to delete the book");
+        }
         return "redirect:/admin/books";
     }
-
-
-    @GetMapping("/edit-book/{id}")
-    public String showEditBookForm(@PathVariable("id") Long id, Model model) {
-        Book book = bookService.getBookById(id);
-        model.addAttribute("book", book);
-        return "/admin/books/edit-book";
-    }
-
-    @PostMapping("/edit-book/{id}")
-    public String editBook(@PathVariable("id") Long id, @ModelAttribute Book book, @RequestParam("coverImageFile") MultipartFile coverImage) {
-        try {
-            bookService.editBook(id, book, coverImage);
-            return "redirect:/books/book-list";
-        } catch (IOException e) {
-            e.printStackTrace();
-            return "redirect:/admin/books/edit-book/" + id + "?error";
-        }
-    }
-
-    
-
-
 }
