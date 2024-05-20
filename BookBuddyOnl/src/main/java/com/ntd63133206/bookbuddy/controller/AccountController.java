@@ -220,10 +220,8 @@ public class AccountController {
                 }
             };
 
-            // Sử dụng Authenticator để xác thực khi gửi email
             Session session = Session.getInstance(properties, authenticator);
 
-            // Tiếp tục với việc thiết lập thông tin email và gửi email như bạn đã làm trước đó
             helper.setFrom("bookbuddy@gmail.com", "BookBuddy Support");
             helper.setTo(recipientEmail);
             String subject = "Here's the link to reset your password";
@@ -276,7 +274,8 @@ public class AccountController {
 		return "redirect:/account/login";
 	}
     @GetMapping("/logout")
-    public String logout(HttpServletRequest request) {        System.out.println("Logout!");
+    public String logout(HttpServletRequest request) {
+    	System.out.println("Logout!");
         return "redirect:/account/login";
     }
 

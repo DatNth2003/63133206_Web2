@@ -21,7 +21,7 @@ public class HomeController {
 	@GetMapping("/")
     public String homePage(Model model) {
         List<Book> latestBooks = bookService.get10LatestBooks();
-        model.addAttribute("latestBooks", latestBooks);
+        model.addAttribute("partitionedBooks", partitionList(latestBooks, 4));
         return "/home/index";
     }
     private List<List<Book>> partitionList(List<Book> list, int size) {

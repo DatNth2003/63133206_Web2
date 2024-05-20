@@ -49,11 +49,19 @@ public class UserController {
             keyword = null;
         }
 
-        if ("".equals(role)) {
-            role = null;
+        Long roleIdLong = null;
+        if (!"".equals(role)) {
+            Role roleObject = roleService.getRoleByName(role);
+            if (roleObject != null) {
+                roleIdLong = roleObject.getId();
+            }
         }
 
-        usersPage = userService.searchUsersByKeywordAndRole(keyword, role, pageRequest);
+        if ("".equals(role)) {
+            usersPage = userService.searchUsersByKeyword(keyword, pageRequest);
+        } else {
+            usersPage = userService.searchUsersByKeywordAndRole(keyword, roleIdLong, pageRequest);
+        }
 
         model.addAttribute("users", usersPage.getContent());
         model.addAttribute("currentPage", usersPage.getNumber() + 1);
@@ -63,6 +71,7 @@ public class UserController {
 
         return "admin/users/user-list";
     }
+
     @PostMapping("/search")
     public String searchUsers(@RequestParam(name = "keyword", required = false) String keyword,
                               @RequestParam(name = "role", required = false) String role,

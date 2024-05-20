@@ -47,7 +47,7 @@ public class TagController {
         }
         tagService.addTag(tag);
         redirectAttributes.addFlashAttribute("successMessage", "Tag added successfully!");
-        return "redirect:/admin/tags/list";
+        return "redirect:/admin/tags/";
     }
 
     @GetMapping("/edit/{id}")
@@ -74,6 +74,6 @@ public class TagController {
     public String deleteTag(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
         tagService.deleteTag(id);
         redirectAttributes.addFlashAttribute("successMessage", "Tag deleted successfully!");
-        return "redirect:/admin/tags/list";
+        return "redirect:/admin/tags/";
     }
 }

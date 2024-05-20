@@ -72,7 +72,7 @@ public class BookService {
     
     public String saveCoverImage(Book book, MultipartFile coverImage) throws IOException {
         if (coverImage != null && !coverImage.isEmpty()) {
-            String fileName = UUID.randomUUID().toString();
+            String fileName = UUID.randomUUID().toString() + "." + getFileExtension(coverImage.getOriginalFilename());
             String coverImagePath = UPLOAD_DIR + fileName;
             byte[] coverImageBytes = coverImage.getBytes();
             Path path = Paths.get(coverImagePath);
@@ -82,6 +82,15 @@ public class BookService {
         }
         return null;
     }
+
+    private String getFileExtension(String fileName) {
+        int lastIndex = fileName.lastIndexOf('.');
+        if (lastIndex != -1) {
+            return fileName.substring(lastIndex + 1);
+        }
+        return "";
+    }
+
 
     public String savePdfFile(Book book, MultipartFile pdfFile) throws IOException {
         if (pdfFile != null && !pdfFile.isEmpty()) {

@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 
 import com.ntd63133206.bookbuddy.model.User;
-import com.ntd63133206.bookbuddy.repository.UserRepository;
+import com.ntd63133206.bookbuddy.service.UserService;
 
 import java.util.List;
 @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -20,7 +20,7 @@ import java.util.List;
 @Controller
 public class AdminController {
 	@Autowired
-	private UserRepository userRepository;
+	private UserService userService;
 
 	@GetMapping({"", "/", "/index"})
 	public String adminPage(Model model) {
@@ -28,7 +28,7 @@ public class AdminController {
 	    int size = 10;
 
 	    Pageable pageable = PageRequest.of(page, size);
-	    Page<User> usersPage = userRepository.findAllByOrderByLastLoginDesc(pageable);
+	    Page<User> usersPage = userService.findAllByOrderByLastLoginDesc(pageable);
 
 	    if (usersPage != null) {
 	        List<User> userList = usersPage.getContent();

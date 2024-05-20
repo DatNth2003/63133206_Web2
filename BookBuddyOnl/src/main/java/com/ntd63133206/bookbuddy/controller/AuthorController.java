@@ -56,7 +56,7 @@ public class AuthorController {
         model.addAttribute("totalPages", authorsPage.getTotalPages());
         model.addAttribute("keyword", keyword);
 
-        return "admin/authors/list";
+        return "admin/authors/author-list";
     }
 
     @PostMapping("/search")
@@ -67,6 +67,7 @@ public class AuthorController {
         }
         return "redirect:/admin/authors/";
     }
+
 
 
 
@@ -107,10 +108,6 @@ public class AuthorController {
         return "redirect:/admin/authors";
     }
 
-
-
-
-    
 
     @GetMapping("/edit/{id}")
     public String showEditForm(@PathVariable Long id, Model model) {

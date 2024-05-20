@@ -25,6 +25,25 @@
         }
         .book-card {
             text-align: center;
+            position: relative;
+        }
+        .book-actions {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .book-card:hover .book-actions {
+            opacity: 1;
+        }
+        .like-icon {
+            font-size: 24px;
+            color: red;
+        }
+        .like-icon.not-liked {
+            color: black;
         }
         .carousel-control-prev,
         .carousel-control-next {
@@ -63,26 +82,36 @@
             <h2>Chào mừng đến với BookBuddy</h2>
             <p>BookBuddy là nơi bạn có thể tìm kiếm và chia sẻ những cuốn sách yêu thích của mình.</p>
         </div>
-        <div class="container mt-5">
-    <h2>Sách mới nhất</h2>
+       <div class="container mt-5">
+		    <h2>Sách mới nhất</h2>
 		    <div th:if="${not #lists.isEmpty(partitionedBooks)}">
 		        <div id="latestBooksCarousel" class="carousel slide" data-bs-ride="carousel">
 		            <div class="carousel-inner">
-		                <!-- Loop through partitioned book groups -->
 		                <div th:each="bookChunk, chunkStat : ${partitionedBooks}">
 		                    <div class="carousel-item" th:classappend="${chunkStat.index == 0} ? 'active'">
 		                        <div class="row">
-		                            <div th:each="book, iterStat : ${bookChunk}" class="col-md-3 book-card">
-		                                <div class="card">
-		                                    <img th:src="@{${book.coverImage != null} ? '/images/books/covers/' + ${book.coverImage} : '/images/books/covers/default/default.png'}" class="card-img-top" alt="Book Image">
-		                                    <div class="card-body">
-		                                        <h5 class="card-title" th:text="${book.title}"></h5>
-		                                        <p class="card-text" th:text="${book.description}"></p>
+		                            <div th:each="book, iterStat : ${bookChunk}" class="col-md-3">
+		                                <div class="card book-card p-5">
+		                                    <div class="ratio ratio-1x1">
+		                                        <img th:src="@{${book.coverImage != null} ? '/images/books/covers/' + ${book.coverImage} : '/images/books/covers/default/default.png'}" class="card-img-top rounded-circle" alt="Book Image">
 		                                    </div>
+		                                    <div class="card-body">
+		                                        <h5 class="card-title" th:if="${book.title != null}" th:text="${book.title}">Unknown Book</h5>
+												<h5 class="card-title" th:text="${book.authors.size() > 0 ? book.authors.iterator().next().getName() : 'Unknown'}"></h5>
+    											<p class="card-text" th:if="${book.description != null}" th:text="${book.description}"></p>
+    											<p class="card-text" th:if="${book.description == null}">Không có mô tả</p>
+		                                    </div>
+		                                    <div class="book-actions">
+			                                    <a th:href="@{/books/details/{id}(id=${book.id})}" class="btn btn-primary btn-sm" title="Chi tiết"><i class="bi bi-info-circle"></i></a>
+												<form action="/favorites/${book.id}" method="post">
+												    <button type="submit" class="btn btn-danger btn-sm like-icon not-liked">
+												        <i class="bi bi-heart"></i>
+												    </button>
+												</form>
+			                                </div>
+		                                    <div th:if="${iterStat.count % 4 == 0}" class="w-100 d-none d-md-block"></div>
 		                                </div>
 		                            </div>
-		                            <!-- Add empty divs to make up for less than 4 books in a chunk -->
-		                            <div th:if="${bookChunk.size() < 4}" th:each="i : ${#numbers.sequence(bookChunk.size() + 1, 4)}" class="col-md-3 book-card"></div>
 		                        </div>
 		                    </div>
 		                </div>
@@ -97,8 +126,8 @@
 		            </button>
 		        </div>
 		    </div>
-
 		</div>
+
 
 		<div class="container mt-5" th:if="${#lists.isEmpty(partitionedBooks)}">
 		    <p>Chưa có sách.</p>

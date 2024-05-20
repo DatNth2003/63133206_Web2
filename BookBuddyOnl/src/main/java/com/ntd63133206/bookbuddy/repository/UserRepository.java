@@ -17,23 +17,23 @@ import com.ntd63133206.bookbuddy.model.User;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-
     User findByUsername(String username);
     User findByEmail(String email);
     User findByResetPasswordToken(String resetToken);
     boolean existsByEmail(String email);
     boolean existsByUsername(String username);
-    List<User> findAll();    
-    Page<User> findAllByOrderByLastLoginDesc(Pageable pageable);
 
-    @Query("SELECT u FROM User u WHERE (:keyword IS NULL OR LOWER(u.email) LIKE %:keyword% OR LOWER(u.username) LIKE %:keyword%) AND (:role IS NULL OR EXISTS (SELECT 1 FROM u.roles r WHERE LOWER(r.name) = LOWER(:role)))")
-    Page<User> findByKeywordAndRole(String keyword, String role, Pageable pageable);
+    @Query("SELECT u FROM User u WHERE (:keyword IS NULL OR LOWER(u.email) LIKE %:keyword% OR LOWER(u.username) LIKE %:keyword%) AND (:roleId IS NULL OR EXISTS (SELECT 1 FROM u.roles r WHERE r.id = :roleId))")
+    Page<User> findByKeywordAndRoleId(String keyword, Long roleId, Pageable pageable);
 
     @Query("SELECT u FROM User u WHERE :keyword IS NULL OR LOWER(u.email) LIKE %:keyword% OR LOWER(u.username) LIKE %:keyword%")
     Page<User> findByKeyword(String keyword, Pageable pageable);
 
-    @Query("SELECT u FROM User u JOIN u.roles r WHERE :role IS NULL OR LOWER(r.name) = LOWER(:role)")
-    Page<User> findByRole(String role, Pageable pageable);
+    @Query("SELECT u FROM User u JOIN u.roles r WHERE :roleId IS NULL OR r.id = :roleId")
+    Page<User> findByRoleId(Long roleId, Pageable pageable);
+
     @Query("SELECT u FROM User u WHERE u.lastLogin IS NOT NULL ORDER BY u.lastLogin DESC")
     Page<User> findRecentlyLoggedInUsers(Pageable pageable);
+    Page<User> findAllByOrderByLastLoginDesc(Pageable pageable);
+
 }

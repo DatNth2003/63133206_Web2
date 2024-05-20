@@ -7,6 +7,7 @@ import com.ntd63133206.bookbuddy.repository.UserRepository;
 import com.ntd63133206.bookbuddy.util.Utility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -65,6 +66,7 @@ public class UserService {
             userRepository.save(adminUser);
         }
     }
+
 
 
     public void assignRoleToUser(User user, Role newRole) {
@@ -295,16 +297,34 @@ public class UserService {
         user.setResetPasswordToken(null);
         userRepository.save(user);
     }
-
-    public Page<User> searchUsersByKeywordAndRole(String keyword, String role, Pageable pageable) {
-        if (keyword != null && role != null) {
-            return userRepository.findByKeywordAndRole(keyword, role, pageable);
+    public Page<User> findAllByOrderByLastLoginDesc(Pageable pageable) {
+        return userRepository.findAllByOrderByLastLoginDesc(pageable);
+    }
+    public Page<User> searchUsersByKeyword(String keyword, Pageable pageable) {
+        return userRepository.findByKeyword(keyword, pageable);
+    }
+    public Page<User> searchUsersByKeywordAndRole(String keyword, Long roleId, Pageable pageable) {
+        if (keyword != null && roleId != null) {
+            Optional<Role> roleOptional = roleRepository.findById(roleId);
+            if (!roleOptional.isPresent()) {
+                throw new IllegalArgumentException("Role with id " + roleId + " not found.");
+            }
+            
+            return userRepository.findByKeywordAndRoleId(keyword, roleId, pageable);
         } else if (keyword != null) {
             return userRepository.findByKeyword(keyword, pageable);
-        } else if (role != null) {
-            return userRepository.findByRole(role, pageable);
+        } else if (roleId != null) {
+            Optional<Role> roleOptional = roleRepository.findById(roleId);
+            if (!roleOptional.isPresent()) {
+                throw new IllegalArgumentException("Role with id " + roleId + " not found.");
+            }
+            
+            return userRepository.findByRoleId(roleId, pageable);
         } else {
             return userRepository.findAll(pageable);
         }
     }
+
+
+
 }

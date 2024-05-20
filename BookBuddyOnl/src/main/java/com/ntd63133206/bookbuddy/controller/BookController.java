@@ -116,11 +116,12 @@ public class BookController {
 
     @GetMapping(value = {"", "/"})
     public String getAllBooks(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String author,
-            @RequestParam(required = false) String sort,
-            Model model) {
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam(required = false) String author,
+        @RequestParam(required = false) String sort,
+        Model model
+    ) {
         try {
             if (page < 0) {
                 page = 0;
@@ -142,12 +143,16 @@ public class BookController {
             model.addAttribute("books", books.getContent());
             model.addAttribute("currentPage", page);
             model.addAttribute("totalPages", books.getTotalPages());
+            model.addAttribute("author", author);
+            model.addAttribute("sort", sort);
+
             return "/admin/books/book-list";
         } catch (Exception e) {
             e.printStackTrace();
             return "error";
         }
     }
+
 
 
     @GetMapping("/delete/{id}")

@@ -176,7 +176,7 @@ function validatePassword(password) {
 }
 
 function handleFileInput(input) {
-    var file = input.files[0]; // Lấy tệp từ trường file input
+    var file = input.files[0];
     var allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
     var isValid = false;
 

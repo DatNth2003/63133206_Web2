@@ -64,6 +64,8 @@
 </head>
 
 <body>
+    <th:block th:replace="~{/fragments/user_navbar :: nav}"></th:block>
+
     <div class="container mt-5">
         <div class="search-section mb-5 p-4 border rounded">
             <h2 class="text-center mb-4">Tìm kiếm sách</h2>
@@ -120,7 +122,9 @@
             <div class="row">
                 <div class="col-sm-6 col-md-4 col-lg-3" th:each="book : ${books.content}">
                     <div class="card book-card">
-                        <img th:src="@{/images/default-book-cover.jpg}" class="card-img-top" alt="Book cover">
+                    <span th:text="${book.coverImage}"></span>
+                    
+						<img th:src="@{'/images/books/covers/' + (${book.coverImage} ? ${book.coverImage} : 'default/default.png')}" class="card-img-top" alt="Book cover">
                         <div class="card-body">
                             <h5 class="card-title" th:text="${book.title}"></h5>
                             <p class="card-text" th:text="${book.description}"></p>
@@ -139,7 +143,6 @@
                 </div>
             </div>
 
-            <!-- Pagination Section -->
             <div th:if="${books.totalPages > 1}">
                 <ul class="pagination justify-content-center">
                     <li class="page-item"><a class="page-link" th:href="@{'?page=0'}">First</a></li>

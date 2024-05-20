@@ -138,12 +138,11 @@ public class UserBookController {
 	    model.addAttribute("isFavorite", isFavorite);
 	    model.addAttribute("authors", authors);
 	    model.addAttribute("tags", tags);
-	    model.addAttribute("comments", commentPage.getContent()); // Thêm danh sách comment vào model
+	    model.addAttribute("comments", commentPage.getContent());
 	    model.addAttribute("totalPages", commentPage.getTotalPages());
 	    model.addAttribute("currentPage", commentPage.getNumber());
 	    model.addAttribute("sortBy", sortBy);
 	    model.addAttribute("orderBy", orderBy);
-
 	    return "books/book-details";
 	}
 

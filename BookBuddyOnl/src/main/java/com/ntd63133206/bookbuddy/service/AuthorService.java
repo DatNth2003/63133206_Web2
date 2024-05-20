@@ -57,8 +57,7 @@ public class AuthorService {
 
             String originalFileName = authorImage.getOriginalFilename();
             String fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
-            String filename = "authorimage" + UUID.randomUUID().toString() + fileExtension; // Tên file với UUID + đuôi mở rộng
-
+            String filename = "authorimage" + UUID.randomUUID().toString() + fileExtension;
             Path directory = Paths.get(UPLOAD_DIR);
 
             if (!Files.exists(directory)) {

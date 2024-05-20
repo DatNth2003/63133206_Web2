@@ -1,5 +1,5 @@
 .container-custom {
-		border: 1px solid #dee2e6;
+border: 1px solid #dee2e6;
 		border-radius: 10px;
             padding: 20px;
             margin-top: 50px;
@@ -31,17 +31,17 @@
         .invalid-input {
             border-color: #dc3545 !important;
         }
-        .tag-item, .author-item {
-            display: inline-block;
-            background-color: #f0f0f0;
-            border: 1px solid #ccc;
-            border-radius: 20px;
-            padding: 5px 10px;
-            margin-right: 10px;
-            margin-bottom: 10px;
-            position: relative;
-            cursor: pointer;
-        }
+		.tag-item, .author-item {
+		    display: inline-block;
+		    background-color: #f0f0f0;
+		    border: 1px solid #ccc;
+		    border-radius: 20px;
+		    padding: 5px 10px;
+		    margin-right: 5px;
+		    margin-bottom: 5px;
+		    cursor: pointer;
+		}
+
         .tag-item:hover .tag-description, .author-item:hover .author-description {
             display: block;
         }
@@ -66,3 +66,4 @@
             padding: 2px;
             cursor: pointer;
         }
+        

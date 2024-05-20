@@ -30,7 +30,7 @@
 		                        <input type="file" class="form-control" id="avatar" name="avatarFile" accept="image/*" onchange="handleFileInput(this)">
 		                    </div>
 		                    <div class="col-auto">
-		                        <img id="avatarPreview" class="avatar-preview img-thumbnail" alt="Avatar Preview" th:src="${user.avatar != null ? '@{' + user.avatar + '}' : '@{/images/default-avatar.png}'}">
+								<img id="avatarPreview" class="avatar-preview img-thumbnail" alt="Avatar Preview" th:src="${user.avatar != null ? '/images/users/avatars/' + user.avatar : '/images/default-avatar.png'}">
 		                    </div>
 		                </div>
 		                <div class="mb-3">
@@ -54,7 +54,7 @@
 		                    <div id="selectedRolesTags" class="mt-2">
 		                        <span th:each="role : ${user.roles}" class="role-tag" th:data-id="${role.id}">
 		                            <span th:text="${role.name}"></span>
-		                            <span class="remove-role" onclick="removeRole(this)"> x</span>
+		                            <span class="remove-role" onclick="removeRole(this)"></span>
 		                        </span>
 		                    </div>
 		                </div>
