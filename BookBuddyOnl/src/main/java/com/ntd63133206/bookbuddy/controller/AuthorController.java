@@ -31,17 +31,12 @@ public class AuthorController {
 
     @Autowired
     private AuthorService authorService;
-    @GetMapping("/authors")
-    public String listAuthors(Model model) {
-        List<Author> authors = authorService.findAll();
-        model.addAttribute("authors", authors);
-        return "admin/authors/author-list";
-    }
+    
     @GetMapping("/")
-    public String viewAuthorList(Model model,
-                                 @RequestParam(name = "keyword", required = false, defaultValue = "") String keyword,
-                                 @RequestParam(defaultValue = "0") int page,
-                                 @RequestParam(defaultValue = "10") int size) {
+    public String listAuthors(Model model,
+                              @RequestParam(name = "keyword", required = false, defaultValue = "") String keyword,
+                              @RequestParam(name = "page", required = false, defaultValue = "0") int page,
+                              @RequestParam(name = "size", required = false, defaultValue = "10") int size) {
         Page<Author> authorsPage;
         PageRequest pageRequest = PageRequest.of(page, size);
 
@@ -49,7 +44,11 @@ public class AuthorController {
             keyword = null;
         }
 
-        authorsPage = authorService.searchAuthorsByKeyword(keyword, pageRequest);
+        if (page > 0 && keyword != null) {
+            authorsPage = authorService.searchAuthorsByKeyword(keyword, pageRequest);
+        } else {
+            authorsPage = authorService.searchAuthorsByKeyword(keyword, PageRequest.of(0, size));
+        }
 
         model.addAttribute("authors", authorsPage.getContent());
         model.addAttribute("currentPage", authorsPage.getNumber() + 1);
@@ -58,6 +57,7 @@ public class AuthorController {
 
         return "admin/authors/author-list";
     }
+
 
     @PostMapping("/search")
     public String searchAuthors(@RequestParam(name = "keyword", required = false) String keyword,
@@ -105,7 +105,7 @@ public class AuthorController {
             e.printStackTrace();
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
         }
-        return "redirect:/admin/authors";
+        return "redirect:/admin/authors/";
     }
 
 

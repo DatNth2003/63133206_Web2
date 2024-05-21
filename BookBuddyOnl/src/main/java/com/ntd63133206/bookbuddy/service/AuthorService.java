@@ -44,7 +44,11 @@ public class AuthorService {
     }
 
     public Page<Author> searchAuthorsByKeyword(String keyword, Pageable pageable) {
-        return authorRepository.findByNameContainingIgnoreCase(keyword, pageable);
+        if (keyword == null || keyword.isEmpty()) {
+            return authorRepository.findAll(pageable);
+        } else {
+            return authorRepository.findByNameContainingIgnoreCase(keyword, pageable);
+        }
     }
 
     public String saveAuthorImage(MultipartFile authorImage) {

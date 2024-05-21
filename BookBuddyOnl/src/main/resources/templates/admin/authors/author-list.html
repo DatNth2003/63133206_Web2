@@ -50,19 +50,19 @@
                 </table>
                  <ul class="pagination justify-content-center">
 				    <li class="page-item" th:class="${currentPage == 1 || totalPages <= 1} ? 'disabled' : ''">
-				        <a class="page-link" th:href="@{/admin/authors(page=1, keyword=${keyword})}">Đầu tiên</a>
+				        <a class="page-link" th:href="@{/admin/authors/(page=1, keyword=${keyword})}">Đầu tiên</a>
 				    </li>
 				    <li class="page-item" th:class="${currentPage == 1 || totalPages <= 1} ? 'disabled' : ''">
-				        <a class="page-link" th:href="@{/admin/authors(page=${currentPage - 1}, keyword=${keyword})}">Trước</a>
+				        <a class="page-link" th:href="@{/admin/authors/(page=${currentPage - 1}, keyword=${keyword})}">Trước</a>
 				    </li>
 				    <li class="page-item" th:each="pageNumber : ${#numbers.sequence(1, totalPages)}" th:classappend="${pageNumber == currentPage} ? ' active' : ''">
-				        <a class="page-link" th:href="@{/admin/authors(page=${pageNumber}, keyword=${keyword})}" th:text="${pageNumber}"></a>
+				        <a class="page-link" th:href="@{/admin/authors/(page=${pageNumber}, keyword=${keyword})}" th:text="${pageNumber}"></a>
 				    </li>
 				    <li class="page-item" th:class="${currentPage == totalPages || totalPages <= 1} ? 'disabled' : ''">
-				        <a class="page-link" th:href="@{/admin/authors(page=${currentPage + 1}, keyword=${keyword})}">Tiếp</a>
+				        <a class="page-link" th:href="@{/admin/authors/(page=${currentPage + 1}, keyword=${keyword})}">Tiếp</a>
 				    </li>
 				    <li class="page-item" th:class="${currentPage == totalPages || totalPages <= 1} ? 'disabled' : ''">
-				        <a class="page-link" th:href="@{/admin/authors(page=${totalPages}, keyword=${keyword})}">Cuối</a>
+				        <a class="page-link" th:href="@{/admin/authors/(page=${totalPages}, keyword=${keyword})}">Cuối</a>
 				    </li>
 				</ul>
 

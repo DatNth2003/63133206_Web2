@@ -1,6 +1,7 @@
 package com.ntd63133206.bookbuddy.dto;
 
-import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 public class BookSearchCriteria {
@@ -10,12 +11,11 @@ public class BookSearchCriteria {
     private Set<Long> tagIds;
     private Double minPrice;
     private Double maxPrice;
-    private LocalDate updatedAtStart;
-    private LocalDate updatedAtEnd;
     private int page;
     private int size;
     private String sortBy;
     private String sortOrder; 
+
     public String getKeyword() {
         return keyword;
     }
@@ -56,22 +56,6 @@ public class BookSearchCriteria {
         this.maxPrice = maxPrice;
     }
 
-    public LocalDate getUpdatedAtStart() {
-        return updatedAtStart;
-    }
-
-    public void setUpdatedAtStart(LocalDate updatedAtStart) {
-        this.updatedAtStart = updatedAtStart;
-    }
-
-    public LocalDate getUpdatedAtEnd() {
-        return updatedAtEnd;
-    }
-
-    public void setUpdatedAtEnd(LocalDate updatedAtEnd) {
-        this.updatedAtEnd = updatedAtEnd;
-    }
-
     public int getPage() {
         return page;
     }
@@ -87,6 +71,7 @@ public class BookSearchCriteria {
     public void setSize(int size) {
         this.size = size;
     }
+
     public String getSortBy() {
         return sortBy;
     }
@@ -101,5 +86,33 @@ public class BookSearchCriteria {
 
     public void setSortOrder(String sortOrder) {
         this.sortOrder = sortOrder;
+    }
+
+    public Map<String, Object> toSearchParams() {
+        Map<String, Object> searchParams = new HashMap<>();
+        if (keyword != null && !keyword.isEmpty()) {
+            searchParams.put("keyword", keyword);
+        }
+        if (authorIds != null && !authorIds.isEmpty()) {
+            searchParams.put("authorIds", authorIds);
+        }
+        if (tagIds != null && !tagIds.isEmpty()) {
+            searchParams.put("tagIds", tagIds);
+        }
+        if (minPrice != null) {
+            searchParams.put("minPrice", minPrice);
+        }
+        if (maxPrice != null) {
+            searchParams.put("maxPrice", maxPrice);
+        }
+        return searchParams;
+    }
+
+    public boolean isEmpty() {
+        return keyword == null && 
+               authorIds == null && 
+               tagIds == null && 
+               minPrice == null && 
+               maxPrice == null;
     }
 }

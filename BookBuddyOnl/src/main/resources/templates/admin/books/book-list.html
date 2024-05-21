@@ -3,136 +3,255 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Book Catalog</title>
+    <title>Book List</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <style>
+        .book-card {
+            margin-bottom: 20px;
+            position: relative;
+            transition: transform 0.2s;
+        }
+
+        .book-card:hover {
+            transform: scale(1.05);
+        }
+
+        .action-btns {
+		    display: none;
+		    position: absolute;
+		    bottom: 10px;
+		    right: 10px;
+		    z-index: 10;
+		}
+		
+		.book-card:hover .action-btns {
+		    display: flex;
+		    gap: 5px;
+		}
+
+
+        .tag-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .badge {
+            display: flex;
+            align-items: center;
+        }
+
+        .badge .btn-close {
+            margin-left: 0.5rem;
+            font-size: 0.7rem;
+        }
+
+        .input-group .select2-container {
+            flex: 1 1 auto;
+        }
+
+        .input-group .select2-selection {
+            height: 100%;
+        }
+
+        .input-group button {
+            height: 100%;
+        }
+    </style>
 </head>
+
 <body>
-    <th:block th:replace="~{/admin/fragments/navbar :: nav}"></th:block>
+    <th:block th:replace="~{/fragments/user_navbar :: nav}"></th:block>
 
-    <div class="container mt-4">
-        <!-- Search bar for author -->
-        <div class="row mb-3">
-            <div class="col-md-auto">
-                <input type="text" id="author" class="form-control" placeholder="Enter author name">
-            </div>
-            <div class="col-md-auto">
-                <button class="btn btn-primary" onclick="searchByAuthor()">Search</button>
-            </div>
+    <div class="container mt-5">
+        <div class="search-section mb-5 p-4 border rounded">
+            <h2 class="text-center mb-4">Tìm kiếm sách</h2>
+            <form th:action="@{/admin/books}" th:method="get">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="keyword" class="form-label">Từ khóa:</label>
+                        <input type="text" class="form-control" id="keyword" name="keyword" th:value="${searchCriteria.keyword}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="minPrice" class="form-label">Giá tối thiểu:</label>
+                        <input type="number" class="form-control" id="minPrice" name="minPrice" th:value="${searchCriteria.minPrice}">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="selectedAuthors" class="form-label">Tác giả:</label>
+                        <div class="input-group">
+                            <select id="selectedAuthors" class="form-select">
+							    <option th:each="author : ${authors}" th:value="${author.id}" th:text="${author.name}"></option>
+							</select>
+                            <button type="button" class="btn btn-outline-secondary" onclick="addAuthor()">+</button>
+                        </div>
+                        <div id="selectedAuthorsTags" class="tag-container"></div>
+                        <input type="hidden" name="authorIds">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="selectedTags" class="form-label">Thẻ:</label>
+                        <div class="input-group">
+                            <select id="selectedTags" class="form-select">
+                                <option th:each="tag : ${tags}" th:value="${tag.id}" th:text="${tag.name}"></option>
+                            </select>
+                            <button type="button" class="btn btn-outline-secondary" onclick="addTag()">
+                                <i class="bi bi-plus"></i>
+                            </button>
+                        </div>
+                        <div id="selectedTagsTags" class="tag-container"></div>
+                        <input type="hidden" name="tagIds">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="maxPrice" class="form-label">Giá tối đa:</label>
+                        <input type="number" class="form-control" id="maxPrice" name="maxPrice" th:value="${searchCriteria.maxPrice}">
+                    </div>
+                    <div class="col-md-6 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">Tìm kiếm</button>
+                    </div>
+                </div>
+            </form>
         </div>
 
-        <!-- Sort dropdown -->
-        <div class="row mb-3">
-            <div class="col-md-auto">
-                <select id="sortOption" class="form-select">
-                    <option value="title">Sort by Title</option>
-                    <option value="price">Sort by Price</option>
-                </select>
-            </div>
-            <div class="col-md-auto">
-                <button class="btn btn-primary" onclick="sortBy()">Sort</button>
-            </div>
+        <div class="books-display-section">
+        <div th:if="${books.empty}" class="text-center">Không tìm thấy sách phù hợp</div>
+        <div th:if="${not books.empty}">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Ảnh bìa</th>
+                        <th>Tên sách</th>
+                        <th>Mô tả</th>
+                        <th>Tác giả</th>
+                        <th>Giá</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="book : ${books}">
+                        <td><img th:src="@{'/images/books/covers/' + (${book.coverImage} ? ${book.coverImage} : 'default/default.png')}" alt="Book cover" style="max-width: 100px;"></td>
+                        <td th:text="${book.title}"></td>
+                        <td th:text="${book.description}"></td>
+                        <td>
+                            <span th:if="${#lists.isEmpty(book.authors)}">Không có tác giả</span>
+                            <span th:each="author : ${book.authors}" th:text="${author.name} + ','"></span>
+                        </td>
+                        <td th:text="'Giá: ' + ${#numbers.formatDecimal(book.price, 0, 'COMMA', 2, 'POINT')} + ' VNĐ'"></td>
+                        <td>
+                            <a th:href="@{'/admin/books/edit/' + ${book.id}}" class="btn btn-warning">
+					            <i class="bi bi-pencil-fill"></i>
+					        </a>
+					        <form th:action="@{'/admin/books/delete/' + ${book.id}}" method="post" class="d-inline">
+					            <button type="submit" class="btn btn-danger">
+					                <i class="bi bi-trash-fill"></i>
+					            </button>
+					        </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div th:if="${books.totalPages > 1}">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item"><a class="page-link" th:href="@{'?page=0'}">First</a></li>
+                    <li th:each="i : ${#numbers.sequence(0, books.totalPages - 1)}" class="page-item">
+                        <a class="page-link" th:href="@{'?page=' + ${i}}" th:text="${i + 1}"></a>
+                    </li>
+                    <li class="page-item"><a class="page-link" th:href="@{'?page=' + ${books.totalPages - 1}}">Last</a></li>
+                </ul>
+            </div>a
         </div>
-
-        <!-- Table to display books -->
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Title</th>
-                    <th>Authors</th>
-                    <th>Tags</th>
-                    <th>Price</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="bookTable">
-                <tr th:each="book : ${books}">
-                    <td th:text="${book.id}"></td>
-                    <td th:text="${book.title}"></td>
-                    <td>
-                        <ul>
-                            <li th:each="author : ${book.authors}" th:text="${author.name}"></li>
-                        </ul>
-                    </td>
-                    <td>
-                        <ul>
-                            <li th:each="tag : ${book.tags}" th:text="${tag.name}"></li>
-                        </ul>
-                    </td>
-                    <td th:text="${book.price}"></td>
-                    <td>
-                        <a th:href="@{'/admin/books/edit/' + ${book.id}}" class="btn btn-primary me-2">
-                            <i class="bi bi-pencil-square"></i>
-                        </a>
-                        <a th:href="@{'/pdfs/' + ${book.pdfPath}}" class="btn btn-info me-2">
-                            <i class="bi bi-book"></i>
-                        </a>
-                        <a th:href="@{'/admin/books/delete/' + ${book.id}}" class="btn btn-danger me-2">
-                            <i class="bi bi-trash"></i>
-                        </a>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-
-        <!-- Add Book button -->
-        <div class="text-center">
-            <a th:href="@{/admin/books/add}" class="btn btn-success">Add Book</a>
-        </div>
-
-        <!-- Pagination -->
-        <nav aria-label="Page navigation" class="mt-4 d-flex justify-content-center" th:if="${totalPages > 1 && not #lists.isEmpty(books)}">
-            <ul class="pagination justify-content-center">
-                <li class="page-item">
-                    <a class="page-link" href="#" onclick="goToPage(1)" th:class="${currentPage == 1 || totalPages == 0 ? 'disabled' : ''}">First</a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="#" th:if="${currentPage > 1}" th:attr="onclick='goToPage(' + (${currentPage - 1}) + ')'" th:class="${currentPage == 1 || totalPages == 0 ? 'disabled' : ''}">Previous</a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="#" th:if="${currentPage < totalPages && totalPages > 1}" th:attr="onclick='goToPage(' + (${currentPage + 1}) + ')'" >Next</a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="#" th:if="${totalPages > 1}" th:attr="onclick='goToPage(' + (${totalPages}) + ')'" th:class="${currentPage == totalPages || totalPages == 0 ? 'disabled' : ''}">Last</a>
-                </li>
-            </ul>
-        </nav>
     </div>
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+</div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
-    
-    <script th:inline="javascript">
-        var currentPage = /*[[${currentPage}]]*/ 0;
-        var totalPages = /*[[${totalPages}]]*/ 0;
-        var prevPage = currentPage - 1;
-        var nextPage = currentPage + 1;
-        var lastPage = totalPages - 1;
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#selectedAuthors').select2();
+            $('#selectedTags').select2();
+        });
 
-        function searchByAuthor() {
-            var author = $("#author").val();
-            $.get("/admin/books?page=" + currentPage + "&author=" + author, function(data) {
-                $("#bookTable").html(data);
-            });
+        function createTagElement(text, onRemove) {
+            var tag = document.createElement('div');
+            tag.classList.add('badge', 'bg-primary');
+            tag.textContent = text;
+
+            var removeButton = document.createElement('button');
+            removeButton.classList.add('btn-close', 'ms-2');
+            removeButton.setAttribute('type', 'button');
+            removeButton.setAttribute('aria-label', 'Close');
+            removeButton.addEventListener('click', onRemove);
+
+            tag.appendChild(removeButton);
+            return tag;
         }
 
-        function sortBy() {
-            var sortOption = $("#sortOption").val();
-            $.get("/admin/books?page=" + currentPage + "&sort=" + sortOption, function(data) {
-                $("#bookTable").html(data);
-            });
-        }
+        function addAuthor() {
+            var select = document.getElementById('selectedAuthors');
+            var container = document.getElementById('selectedAuthorsTags');
+            var selectedOption = select.options[select.selectedIndex];
+            var selectedAuthors = document.getElementsByName('authorIds')[0] || document.createElement('input');
+            selectedAuthors.setAttribute('name', 'authorIds');
+            selectedAuthors.style.display = 'none';
 
-        function goToPage(page) {
-            if (totalPages > 0 && currentPage >= 0 && currentPage <= lastPage) {
-                currentPage = page;
-                $.get("/admin/books?page=" + currentPage, function(data) {
-                    $("#bookTable").html(data);
-                });
+            if (!selectedAuthors.parentElement) {
+                document.querySelector('form').appendChild(selectedAuthors);
             }
+
+            var alreadySelected = Array.from(container.children).some(tag => tag.dataset.id == selectedOption.value);
+            if (alreadySelected) {
+                return;
+            }
+
+            var tag = createTagElement(selectedOption.text, function() {
+                container.removeChild(tag);
+                updateHiddenInput('authorIds', '.author-item');
+            });
+            tag.setAttribute('data-id', selectedOption.value);
+            tag.classList.add('author-item');
+
+            container.appendChild(tag);
+            updateHiddenInput('authorIds', '.author-item');
         }
 
+        function addTag() {
+            var select = document.getElementById('selectedTags');
+            var container = document.getElementById('selectedTagsTags');
+            var selectedOption = select.options[select.selectedIndex];
+            var selectedTags = document.getElementsByName('tagIds')[0] || document.createElement('input');
+            selectedTags.setAttribute('name', 'tagIds');
+            selectedTags.style.display = 'none';
 
+            if (!selectedTags.parentElement) {
+                document.querySelector('form').appendChild(selectedTags);
+            }
+
+            var alreadySelected = Array.from(container.children).some(tag => tag.dataset.id == selectedOption.value);
+            if (alreadySelected) {
+                return;
+            }
+
+            var tag = createTagElement(selectedOption.text, function() {
+                container.removeChild(tag);
+                updateHiddenInput('tagIds', '.tag-item');
+            });
+            tag.setAttribute('data-id', selectedOption.value);
+            tag.classList.add('tag-item');
+
+            container.appendChild(tag);
+            updateHiddenInput('tagIds', '.tag-item');
+        }
+
+        function updateHiddenInput(inputName, itemClass) {
+            var selectedIds = Array.from(document.querySelectorAll(itemClass)).map(tag => tag.dataset.id).join(',');
+            document.getElementsByName(inputName)[0].value = selectedIds;
+        }
     </script>
 </body>
 </html>

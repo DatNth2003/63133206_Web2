@@ -59,17 +59,23 @@ public class UserBookController {
 	private PurchaseService purchaseService;
     
     @GetMapping(value = {"", "/"})
-    public String searchBooks(@ModelAttribute("searchCriteria") BookSearchCriteria searchCriteria, Model model) {
-        searchCriteria.setPage(0);
-
+    public String searchBooks(@ModelAttribute("searchCriteria") BookSearchCriteria searchCriteria, 
+                              @AuthenticationPrincipal CustomUserDetails customUserDetails, 
+                              Model model) {
         int pageSize = 10;
-        
         PageRequest pageable = PageRequest.of(searchCriteria.getPage(), pageSize);
         Page<Book> books = bookService.searchBooks(searchCriteria, pageable);
         
         List<Author> authors = authorService.findAll();
         List<Tag> tags = tagService.getAllTags();
         
+        if (customUserDetails != null) {
+            String username = customUserDetails.getUsername();
+            books.forEach(book -> {
+                boolean isFavorite = favoriteService.isBookFavoriteForUser(book.getId(), username);
+                book.setFavorite(isFavorite);
+            });
+        }
         model.addAttribute("books", books);
         model.addAttribute("searchCriteria", searchCriteria);
         model.addAttribute("authors", authors);
@@ -77,6 +83,8 @@ public class UserBookController {
         
         return "books/search-book";
     }
+
+
 	@GetMapping("/read")
     public String readPdf(Model model) {
         String pdfPath = "4093492f-b2cb-4798-b357-35322d455b56_Test.pdf";
@@ -145,6 +153,7 @@ public class UserBookController {
 	    model.addAttribute("orderBy", orderBy);
 	    return "books/book-details";
 	}
+
 
 
 

@@ -19,13 +19,14 @@ public class FavoriteController {
 
 	@Autowired
     private FavoriteService favoriteService;
-
-	@PostMapping("/{bookId}")
-	public String toggleFavoriteStatus(@PathVariable("bookId") Long bookId, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-	    if (customUserDetails != null) {
-	        favoriteService.toggleFavorite(bookId, customUserDetails.getUsername());
-	    }
-	    return "redirect:/books/details/" + bookId;
-	}
-
+	
+    @PostMapping("/{bookId}")
+    public String toggleFavoriteStatus(@PathVariable("bookId") Long bookId,
+                                       @AuthenticationPrincipal CustomUserDetails customUserDetails,
+                                       @RequestParam("redirectUrl") String redirectUrl) {
+        if (customUserDetails != null) {
+            favoriteService.toggleFavorite(bookId, customUserDetails.getUsername());
+        }
+        return "redirect:" + redirectUrl;
+    }
 }

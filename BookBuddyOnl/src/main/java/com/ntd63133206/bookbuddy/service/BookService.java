@@ -5,13 +5,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -129,15 +134,32 @@ public class BookService {
     }
 
     public Page<Book> searchBooks(BookSearchCriteria searchCriteria, Pageable pageable) {
-        return bookRepository.searchBooks(searchCriteria.getKeyword(),
-                                           searchCriteria.getAuthorIds(),
-                                           searchCriteria.getTagIds(),
-                                           searchCriteria.getMinPrice(),
-                                           searchCriteria.getMaxPrice(),
-                                           searchCriteria.getUpdatedAtStart(),
-                                           searchCriteria.getUpdatedAtEnd(),
-                                           pageable);
+        if (searchCriteria.getAuthorIds() == null || searchCriteria.getAuthorIds().isEmpty()) {
+            searchCriteria.setAuthorIds(null);
+        }
+
+        if (searchCriteria.getTagIds() == null || searchCriteria.getTagIds().isEmpty()) {
+            searchCriteria.setTagIds(null);
+        }
+
+        if (searchCriteria.getMinPrice() == null) {
+            searchCriteria.setMinPrice(0.0);
+        }
+
+        if (searchCriteria.getMaxPrice() == null) {
+            searchCriteria.setMaxPrice(Double.MAX_VALUE);
+        }
+
+        return bookRepository.searchBooks(
+            searchCriteria.getKeyword(), 
+            searchCriteria.getAuthorIds(), 
+            searchCriteria.getTagIds(), 
+            searchCriteria.getMinPrice(), 
+            searchCriteria.getMaxPrice(), 
+            pageable
+        );
     }
+
 
     public Optional<Book> findById(Long bookId) {
          return bookRepository.findById(bookId);

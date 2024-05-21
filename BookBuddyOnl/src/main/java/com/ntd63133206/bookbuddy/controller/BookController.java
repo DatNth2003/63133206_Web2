@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -20,8 +21,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.ntd63133206.bookbuddy.dto.BookSearchCriteria;
 import com.ntd63133206.bookbuddy.model.Author;
 import com.ntd63133206.bookbuddy.model.Book;
+import com.ntd63133206.bookbuddy.model.CustomUserDetails;
 import com.ntd63133206.bookbuddy.model.Tag;
 import com.ntd63133206.bookbuddy.service.AuthorService;
 import com.ntd63133206.bookbuddy.service.BookService;
@@ -113,49 +116,25 @@ public class BookController {
 
 
 
-
     @GetMapping(value = {"", "/"})
-    public String getAllBooks(
-        @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "10") int size,
-        @RequestParam(required = false) String author,
-        @RequestParam(required = false) String sort,
-        Model model
-    ) {
-        try {
-            if (page < 0) {
-                page = 0;
-            }
-
-            Page<Book> books;
-            if (author != null && !author.isEmpty()) {
-                books = bookService.findByAuthor(author, PageRequest.of(page, size));
-            } else {
-                Pageable paging;
-                if (sort != null && sort.equals("price")) {
-                    paging = PageRequest.of(page, size, Sort.by("price"));
-                } else {
-                    paging = PageRequest.of(page, size, Sort.by("title"));
-                }
-                books = bookService.getAllBooks(paging);
-            }
-
-            model.addAttribute("books", books.getContent());
-            model.addAttribute("currentPage", page);
-            model.addAttribute("totalPages", books.getTotalPages());
-            model.addAttribute("author", author);
-            model.addAttribute("sort", sort);
-
-            return "/admin/books/book-list";
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "error";
-        }
+    public String searchBooks(@ModelAttribute("searchCriteria") BookSearchCriteria searchCriteria, 
+                              Model model) {
+        int pageSize = 10;
+        PageRequest pageable = PageRequest.of(searchCriteria.getPage(), pageSize);
+        Page<Book> books = bookService.searchBooks(searchCriteria, pageable);
+        
+        List<Author> authors = authorService.findAll();
+        List<Tag> tags = tagService.getAllTags();
+        
+        model.addAttribute("books", books);
+        model.addAttribute("searchCriteria", searchCriteria);
+        model.addAttribute("authors", authors);
+        model.addAttribute("tags", tags);
+        
+        return "admin/books/book-list";
     }
 
-
-
-    @GetMapping("/delete/{id}")
+    @PostMapping("/delete/{id}")
     public String deleteBook(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
         try {
             bookService.deleteBookById(id);
@@ -166,4 +145,5 @@ public class BookController {
         }
         return "redirect:/admin/books";
     }
+
 }
