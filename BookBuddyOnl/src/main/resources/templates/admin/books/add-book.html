@@ -25,7 +25,7 @@
                             <input type="file" class="form-control" id="coverImageFile" name="coverImageFile" accept="image/*" onchange="handleFileInput(this)">
                         </div>
                         <div class="col-auto">
-                            <img id="coverPreview" class="avatar-preview img-thumbnail" alt="Cover Image Preview" src="/images/books/covers/default/default.png">
+                            <img id="coverPreview" class="avatar-preview img-thumbnail" alt="Cover Image Preview" src="/images/books/covers/default/default.png" style ="max-width:200px;">
                         </div>
                     </div>
                     <div class="mb-3">
@@ -99,7 +99,6 @@
 	        }
 
 	        if (file) {
-	            // Đọc tập tin như một định dạng dữ liệu URL
 	            reader.readAsDataURL(file);
 	        } else {
 	            var previewImage = document.getElementById('coverPreview');

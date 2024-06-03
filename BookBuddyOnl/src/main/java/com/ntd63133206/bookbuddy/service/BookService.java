@@ -33,7 +33,7 @@ import com.ntd63133206.bookbuddy.repository.UserRepository;
 @Transactional
 public class BookService {
 	private static final String UPLOAD_DIR = "src/main/resources/static/images/books/covers/";
-    private static final String PDF_UPLOAD_DIR = "src/main/resources/static/pdf/";
+    private static final String PDF_UPLOAD_DIR = "src/main/resources/static/pdfs/";
 	@Autowired
     private UserRepository userRepository;
     @Autowired
@@ -99,7 +99,8 @@ public class BookService {
 
     public String savePdfFile(Book book, MultipartFile pdfFile) throws IOException {
         if (pdfFile != null && !pdfFile.isEmpty()) {
-            String fileName = UUID.randomUUID().toString();
+        	String fileExtension = getFileExtension(pdfFile.getOriginalFilename());
+        	String fileName = UUID.randomUUID().toString() + "." + fileExtension;
             String pdfFilePath = PDF_UPLOAD_DIR + fileName;
             byte[] pdfFileBytes = pdfFile.getBytes();
             Path path = Paths.get(pdfFilePath);
@@ -175,8 +176,7 @@ public class BookService {
             Files.deleteIfExists(oldCoverImageFile);
         }
 
-        // Save the new cover image and update the book entity
-        String newCoverImagePath = saveCoverImage(book, coverImage); // Truyền vào book
+        String newCoverImagePath = saveCoverImage(book, coverImage);
         book.setCoverImage(newCoverImagePath);
     }
 
@@ -187,26 +187,29 @@ public class BookService {
             Files.deleteIfExists(oldPdfFile);
         }
 
-        String newPdfPath = savePdfFile(book, pdfFile); // Truyền vào book
+        String newPdfPath = savePdfFile(book, pdfFile);
         book.setPdfPath(newPdfPath);
     }
 
-    public void updateBookDetails(Long id, Book updatedBook, MultipartFile coverImage, MultipartFile pdfFile) throws IOException {
+    public void updateBookDetails(Long id, Book updatedBook, MultipartFile coverImage, MultipartFile pdfFile, Set<Author> authors) throws IOException {
         Book existingBook = bookRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Book not found with ID: " + id));
 
         existingBook.setTitle(updatedBook.getTitle());
         existingBook.setPrice(updatedBook.getPrice());
         existingBook.setDescription(updatedBook.getDescription());
+        existingBook.setAuthors(authors);
 
         if (coverImage != null && !coverImage.isEmpty()) {
-            updateCoverImage(id, existingBook, coverImage); // Sử dụng updateCoverImage đã sửa
+            updateCoverImage(id, existingBook, coverImage);
         }
 
         if (pdfFile != null && !pdfFile.isEmpty()) {
-            updatePdf(id, existingBook, pdfFile); // Sử dụng updatePdf đã sửa
+            updatePdf(id, existingBook, pdfFile);
         }
 
         bookRepository.save(existingBook);
     }
+
+    
 
 }

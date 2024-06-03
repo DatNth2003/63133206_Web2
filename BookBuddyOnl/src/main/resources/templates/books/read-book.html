@@ -4,17 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Read Book</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf_viewer.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         body {
             margin: 0;
             padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            width: 100vw;
         }
         #pdfViewerContainer {
             width: 100%;
@@ -26,22 +21,36 @@
             height: 100%;
             border: none;
         }
+        .no-pdf-message {
+            font-size: 24px;
+            color: red;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
-    <div id="pdfViewerContainer">
-    <span th:text = "@{'/' + ${pdfPath}}"></span>
-        <iframe id="pdfViewer" th:src="@{'/' + ${pdfPath}}"></iframe>
-        
+    <th:block th:replace="~{/fragments/user_navbar :: nav}"></th:block>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">Read Book</div>
+                    <div class="card-body">
+                        <a th:if="${pdfPath != null}" th:href="@{${pdfPath}}" target="_blank" class="btn btn-primary">
+                            <i class="bi bi-file-pdf"></i> Xem PDF
+                        </a>
+                        <a th:href="@{'/books/details/' + ${bookId}}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Quay về trang chi tiết
+                        </a>
+                        <div id="pdfViewerContainer">
+                            <iframe id="pdfViewer" th:if="${pdfPath != null}" th:src="@{${pdfPath}}"></iframe>
+                            <p class="no-pdf-message" th:unless="${pdfPath != null}">Sách chưa có nội dung.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.min.js"></script>
-    <script>
-        // Example of loading a PDF document using PDF.js
-        document.addEventListener('DOMContentLoaded', function () {
-            var url = /*[[${pdfPath}]]*/ 'URL_TO_PDF';
-            // More configurations and functionalities can be added here
-        });
-    </script>
 </body>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
 </html>

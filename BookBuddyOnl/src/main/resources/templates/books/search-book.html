@@ -13,6 +13,9 @@
             margin-bottom: 20px;
             position: relative;
             transition: transform 0.2s;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
         }
 
         .book-card:hover {
@@ -20,18 +23,17 @@
         }
 
         .action-btns {
-		    display: none;
-		    position: absolute;
-		    bottom: 10px;
-		    right: 10px;
-		    z-index: 10;
-		}
-		
-		.book-card:hover .action-btns {
-		    display: flex;
-		    gap: 5px;
-		}
+            display: none;
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            z-index: 10;
+        }
 
+        .book-card:hover .action-btns {
+            display: flex;
+            gap: 5px;
+        }
 
         .tag-container {
             display: flex;
@@ -61,9 +63,22 @@
         .input-group button {
             height: 100%;
         }
+
+        .card-body {
+            flex: 1;
+        }
+
+        .card-text {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+        }
+
+
     </style>
 </head>
-
 <body>
     <th:block th:replace="~{/fragments/user_navbar :: nav}"></th:block>
 
@@ -86,8 +101,8 @@
                         <label for="selectedAuthors" class="form-label">Tác giả:</label>
                         <div class="input-group">
                             <select id="selectedAuthors" class="form-select">
-							    <option th:each="author : ${authors}" th:value="${author.id}" th:text="${author.name}"></option>
-							</select>
+                                <option th:each="author : ${authors}" th:value="${author.id}" th:text="${author.name}"></option>
+                            </select>
                             <button type="button" class="btn btn-outline-secondary" onclick="addAuthor()">+</button>
                         </div>
                         <div id="selectedAuthorsTags" class="tag-container"></div>
@@ -113,7 +128,7 @@
                         <input type="number" class="form-control" id="maxPrice" name="maxPrice" th:value="${searchCriteria.maxPrice}">
                     </div>
                     <div class="col-md-6 d-flex align-items-end">
-                        <button type="submit" class="btn btn-primary w-100">Tìm kiếm</button>
+                        <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search"></i> Tìm kiếm</button>
                     </div>
                 </div>
             </form>
@@ -121,61 +136,75 @@
 
         <div class="books-display-section">
             <div class="row">
-	            <th:block th:if="${books.empty}">
-	                <div class="col-12">
-	                    <div class="alert alert-warning" role="alert">
-	                        Không tìm thấy kết quả phù hợp.
-	                    </div>
-	                </div>
-	            </th:block>
+                <th:block th:if="${books.empty}">
+                    <div class="col-12">
+                        <div class="alert alert-warning" role="alert">
+                            Không tìm thấy kết quả phù hợp.
+                        </div>
+                    </div>
+                </th:block>
                 <div class="col-sm-6 col-md-4 col-lg-3" th:each="book : ${books.content}">
-				    <div class="card book-card position-relative">
-				        <img th:src="@{'/images/books/covers/' + (${book.coverImage} ? ${book.coverImage} : 'default/default.png')}" class="card-img-top" alt="Book cover">
-				        <div class="card-body">
-				            <h5 class="card-title" th:text="${book.title}"></h5>
-				            <p class="card-text" th:text="${book.description}"></p>
-				        </div>
-				        <div class="action-btns position-absolute bottom-0 end-0 mb-3 me-3">
-				            <a th:href="@{'/books/details/' + ${book.id}}" class="btn btn-primary">Xem chi tiết</a>
-				        </div>
-				        <ul class="list-group list-group-flush">
-				            <li class="list-group-item">Tác giả:
-				                <span th:if="${#lists.isEmpty(book.authors)}">Không có tác giả</span>
-				                <span th:each="author : ${book.authors}" class="badge bg-secondary" th:text="${author.name}"></span>
-				            </li>
-							<li class="list-group-item" th:text="'Giá: ' + ${#numbers.formatDecimal(book.price, 0, 'COMMA', 2, 'POINT')} + ' VNĐ'"></li>
-				        </ul>
-						<div class="action-btns position-absolute bottom-0 end-0 mb-3 me-3">
-						    <a th:href="@{'/books/details/' + ${book.id}}">
-						        <i class="bi bi-info-circle-fill text-primary detail-icon"></i>
-						    </a>
-						</div>
+                    <div class="card book-card position-relative">                    
+		                <img th:src="@{${book.coverImage != null} ? '/images/books/covers/' + ${book.coverImage} : '/images/books/covers/default/default.png'}" alt="Book Cover" class="img-fluid book-cover">
 
-                        <form th:action="@{'/favorites/' + ${book.id}}" method="post">
-						    <input type="hidden" name="redirectUrl" th:value="@{'/books'}">
-						    <button type="submit" class="btn btn-danger btn-sm like-icon" th:classappend="${isFavorite} ? 'liked' : 'not-liked'">
-								<i class="bi" th:classappend="${book.isFavorite} ? 'bi-heart-fill' : 'bi-heart'"></i>
-						    </button>
-						</form>
-
-				    </div>
+                        <div class="card-body">
+                            <h5 class="card-title" th:text="${#strings.isEmpty(book.title) ? 'Sách không rõ tên' : book.title}"></h5>
+                            <p class="card-text" th:text="${#strings.isEmpty(book.description) ? 'Chưa có mô tả!' : book.description}"></p>
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">Tác giả:
+                                <span th:if="${#lists.isEmpty(book.authors)}">Không có tác giả</span>
+                                <span th:each="author : ${book.authors}" class="badge bg-secondary" th:text="${author.name}"></span>
+                            </li>
+                            <li class="list-group-item" th:text="'Giá: ' + ${#numbers.formatDecimal(book.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></li>
+                        </ul>
+                        <div class="action-btns position-absolute">
+                            <a th:href="@{'/books/details/' + ${book.id}}" class="text-decoration-none">
+                                <button type="button" class="btn btn-outline-primary btn-sm detail-btn" aria-label="Detail">
+                                    <i class="bi bi-info-circle"></i>
+                                </button>
+                            </a>
+                            <form th:action="@{/favorites/{bookId}(bookId=${book.id})}" method="post">
+                                <input type="hidden" name="redirectUrl" th:value="@{'/books/details/' + ${book.id}}">
+                                <button type="submit" class="btn btn-danger btn-sm like-icon" th:classappend="${isFavorite} ? 'liked' : 'not-liked'">
+                                    <i class="bi" th:classappend="${isFavorite} ? 'bi-heart-fill' : 'bi-heart'"></i>
+                                </button>
+                            </form>
+                            <div class="comment-input">
+                                <form th:action="@{/comments/add/{bookId}(bookId=${book.id})}" method="post">
+                                    <input type="hidden" name="redirectUrl" value="/books/details/">
+                                    <input type="hidden" name="bookId" th:value="${book.id}">
+                                    <textarea name="content" id="content" class="form-control" rows="3" placeholder="Nhập bình luận của bạn"></textarea>
+                                    <button type="submit" class="btn btn-primary mt-2"><i class="bi bi-send-plus"></i>Gửi</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
 				</div>
-
             </div>
 
             <div th:if="${books.totalPages > 1}">
                 <ul class="pagination justify-content-center">
-                    <li class="page-item"><a class="page-link" th:href="@{'?page=0'}">First</a></li>
-                    <li th:each="i : ${#numbers.sequence(0, books.totalPages - 1)}" class="page-item">
+                    <li class="page-item" th:classappend="${books.pageable.pageNumber == 0} ? 'disabled'">
+                        <a class="page-link" th:href="@{'?page=0'}">First</a>
+                    </li>
+                    <li class="page-item" th:classappend="${books.pageable.pageNumber == 0} ? 'disabled'">
+                        <a class="page-link" th:href="@{'?page=' + ${books.pageable.pageNumber - 1}}">&laquo;</a>
+                    </li>
+                    <li th:each="i : ${#numbers.sequence(0, books.totalPages - 1)}" class="page-item" th:classappend="${books.pageable.pageNumber == i} ? 'active'">
                         <a class="page-link" th:href="@{'?page=' + ${i}}" th:text="${i + 1}"></a>
                     </li>
-                    <li class="page-item"><a class="page-link" th:href="@{'?page=' + ${books.totalPages - 1}}">Last</a></li>
+                    <li class="page-item" th:classappend="${books.pageable.pageNumber + 1 == books.totalPages} ? 'disabled'">
+                        <a class="page-link" th:href="@{'?page=' + ${books.pageable.pageNumber + 1}}">&raquo;</a>
+                    </li>
+                    <li class="page-item" th:classappend="${books.pageable.pageNumber + 1 == books.totalPages} ? 'disabled'">
+                        <a class="page-link" th:href="@{'?page=' + ${books.totalPages - 1}}">Last</a>
+                    </li>
                 </ul>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
@@ -184,80 +213,58 @@
             $('#selectedTags').select2();
         });
 
-        function createTagElement(text, onRemove) {
-            var tag = document.createElement('div');
-            tag.classList.add('badge', 'bg-primary');
-            tag.textContent = text;
-
-            var removeButton = document.createElement('button');
-            removeButton.classList.add('btn-close', 'ms-2');
-            removeButton.setAttribute('type', 'button');
-            removeButton.setAttribute('aria-label', 'Close');
-            removeButton.addEventListener('click', onRemove);
-
-            tag.appendChild(removeButton);
-            return tag;
-        }
-
         function addAuthor() {
-            var select = document.getElementById('selectedAuthors');
-            var container = document.getElementById('selectedAuthorsTags');
-            var selectedOption = select.options[select.selectedIndex];
-            var selectedAuthors = document.getElementsByName('authorIds')[0] || document.createElement('input');
-            selectedAuthors.setAttribute('name', 'authorIds');
-            selectedAuthors.style.display = 'none';
+            const select = document.getElementById('selectedAuthors');
+            const selectedAuthorId = select.value;
+            const selectedAuthorText = select.options[select.selectedIndex].text;
 
-            if (!selectedAuthors.parentElement) {
-                document.querySelector('form').appendChild(selectedAuthors);
+            if (selectedAuthorId) {
+                const tagsContainer = document.getElementById('selectedAuthorsTags');
+                const existingTag = tagsContainer.querySelector(`span[data-id="${selectedAuthorId}"]`);
+                if (!existingTag) {
+                    const span = document.createElement('span');
+                    span.className = 'badge bg-primary';
+                    span.dataset.id = selectedAuthorId;
+                    span.innerHTML = `${selectedAuthorText} <button type="button" class="btn-close" aria-label="Close" onclick="removeTag(this, 'authorIds')"></button>`;
+                    tagsContainer.appendChild(span);
+
+                    updateHiddenField('selectedAuthorsTags', 'authorIds');
+                }
             }
-
-            var alreadySelected = Array.from(container.children).some(tag => tag.dataset.id == selectedOption.value);
-            if (alreadySelected) {
-                return;
-            }
-
-            var tag = createTagElement(selectedOption.text, function() {
-                container.removeChild(tag);
-                updateHiddenInput('authorIds', '.author-item');
-            });
-            tag.setAttribute('data-id', selectedOption.value);
-            tag.classList.add('author-item');
-
-            container.appendChild(tag);
-            updateHiddenInput('authorIds', '.author-item');
         }
 
         function addTag() {
-            var select = document.getElementById('selectedTags');
-            var container = document.getElementById('selectedTagsTags');
-            var selectedOption = select.options[select.selectedIndex];
-            var selectedTags = document.getElementsByName('tagIds')[0] || document.createElement('input');
-            selectedTags.setAttribute('name', 'tagIds');
-            selectedTags.style.display = 'none';
+            const select = document.getElementById('selectedTags');
+            const selectedTagId = select.value;
+            const selectedTagText = select.options[select.selectedIndex].text;
 
-            if (!selectedTags.parentElement) {
-                document.querySelector('form').appendChild(selectedTags);
+            if (selectedTagId) {
+                const tagsContainer = document.getElementById('selectedTagsTags');
+                const existingTag = tagsContainer.querySelector(`span[data-id="${selectedTagId}"]`);
+                if (!existingTag) {
+                    const span = document.createElement('span');
+                    span.className = 'badge bg-secondary';
+                    span.dataset.id = selectedTagId;
+                    span.innerHTML = `${selectedTagText} <button type="button" class="btn-close" aria-label="Close" onclick="removeTag(this, 'tagIds')"></button>`;
+                    tagsContainer.appendChild(span);
+
+                    updateHiddenField('selectedTagsTags', 'tagIds');
+                }
             }
-
-            var alreadySelected = Array.from(container.children).some(tag => tag.dataset.id == selectedOption.value);
-            if (alreadySelected) {
-                return;
-            }
-
-            var tag = createTagElement(selectedOption.text, function() {
-                container.removeChild(tag);
-                updateHiddenInput('tagIds', '.tag-item');
-            });
-            tag.setAttribute('data-id', selectedOption.value);
-            tag.classList.add('tag-item');
-
-            container.appendChild(tag);
-            updateHiddenInput('tagIds', '.tag-item');
         }
 
-        function updateHiddenInput(inputName, itemClass) {
-            var selectedIds = Array.from(document.querySelectorAll(itemClass)).map(tag => tag.dataset.id).join(',');
-            document.getElementsByName(inputName)[0].value = selectedIds;
+        function removeTag(button, hiddenFieldId) {
+            const tag = button.parentNode;
+            tag.parentNode.removeChild(tag);
+            updateHiddenField(button.parentNode.parentNode.id, hiddenFieldId);
+        }
+
+        function updateHiddenField(tagsContainerId, hiddenFieldId) {
+            const tagsContainer = document.getElementById(tagsContainerId);
+            const hiddenField = document.getElementsByName(hiddenFieldId)[0];
+            const tags = tagsContainer.querySelectorAll('span');
+            const ids = Array.from(tags).map(tag => tag.dataset.id);
+            hiddenField.value = ids.join(',');
         }
     </script>
 </body>

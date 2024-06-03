@@ -101,8 +101,9 @@
 						    </div>
 						
 						    <div th:if="${book.pdfPath}">
-								<input type="hidden" name="existingPdfFile" th:value="${book.pdfPath}" />
+								<input name="existingPdfFile" th:value="${book.pdfPath}" />
 						    </div>
+						    
 						    <div class="mb-3">
 						        <label for="pdfFile" class="form-label">PDF File:</label>
 						        <input type="file" class="form-control" id="pdfFile" name="pdfFile" accept=".pdf" onchange="handlePdfFileInput(this)">
@@ -113,7 +114,8 @@
 						        <div class="mb-3 flex-grow-1">
 						            <label for="selectedAuthors">Authors:</label>
 						            <div class="input-group">
-						                <select id="selectedAuthors" class="form-select" multiple>
+										<select id="selectedAuthors" name="selectedAuthors" class="form-select">
+
 						                    <option th:each="author : ${authors}" th:value="${author.id}" th:text="${author.name}" th:selected="${book.authors.contains(author)}"></option>
 						                </select>
 						                <button type="button" class="btn btn-outline-secondary" onclick="addAuthor()">+</button>
@@ -130,7 +132,7 @@
 						        <div class="mb-3 flex-grow-1">
 						            <label for="selectedTags">Tags:</label>
 						            <div class="input-group">
-						                <select id="selectedTags" class="form-select" multiple>
+						                <select id="selectedTags" class="form-select">
 						                    <option th:each="tag : ${tags}" th:value="${tag.id}" th:text="${tag.name}" th:selected="${book.tags.contains(tag)}"></option>
 						                </select>
 						                <button type="button" class="btn btn-outline-secondary" onclick="addTag()">
@@ -224,84 +226,82 @@
             }
         }
 
-        function createTagElement(text, onRemove) {
+
+        function addAuthor() {
+            var select = document.getElementById('selectedAuthors');
+            var selectedOption = select.options[select.selectedIndex];
+            var container = document.getElementById('selectedAuthorsTags');
+
+            var alreadySelected = Array.from(container.children).some(function(tag) {
+                return tag.dataset.id == selectedOption.value;
+            });
+
+            if (alreadySelected) {
+                return;
+            }
+
+            var tag = createTagElement(selectedOption.text, selectedOption.value, function() {
+                container.removeChild(tag);
+            });
+
+            container.appendChild(tag);
+
+            var selectedAuthorsContainer = document.querySelector('.selected-authors');
+            var selectedAuthorSpan = document.createElement('span');
+            selectedAuthorSpan.classList.add('selected-author');
+            selectedAuthorSpan.textContent = selectedOption.text;
+            selectedAuthorsContainer.appendChild(selectedAuthorSpan);
+        }
+
+        function addTag() {
+            var select = document.getElementById('selectedTags');
+            var selectedOption = select.options[select.selectedIndex];
+            var container = document.getElementById('selectedTagsTags');
+
+            var alreadySelected = Array.from(container.children).some(function(tag) {
+                return tag.dataset.id == selectedOption.value;
+            });
+
+            if (alreadySelected) {
+                return;
+            }
+
+            var tag = createTagElement(selectedOption.text, selectedOption.value, function() {
+                container.removeChild(tag);
+            });
+
+            container.appendChild(tag);
+
+            var selectedTagsContainer = document.querySelector('.selected-tags');
+            var selectedTagSpan = document.createElement('span');
+            selectedTagSpan.classList.add('selected-tag');
+            selectedTagSpan.textContent = selectedOption.text;
+            selectedTagsContainer.appendChild(selectedTagSpan);
+        }
+
+
+
+        function createTagElement(text, value, option, onRemove) {
             var tag = document.createElement('div');
             tag.classList.add('badge', 'bg-primary');
             tag.textContent = text;
+            tag.dataset.id = value;
 
             var removeButton = document.createElement('button');
             removeButton.classList.add('btn-close', 'ms-2');
             removeButton.setAttribute('type', 'button');
             removeButton.setAttribute('aria-label', 'Close');
-            removeButton.addEventListener('click', onRemove);
+            removeButton.addEventListener('click', function() {
+                onRemove();
+                option.selected = false;
+            });
 
             tag.appendChild(removeButton);
             return tag;
         }
 
-        function addAuthor() {
-            var select = document.getElementById('selectedAuthors');
-            var container = document.getElementById('selectedAuthorsTags');
-            var selectedOption = select.options[select.selectedIndex];
-            var selectedAuthors = document.getElementsByName('selectedAuthors')[0] || document.createElement('select');
-            selectedAuthors.setAttribute('name', 'selectedAuthors');
-            selectedAuthors.setAttribute('multiple', 'multiple');
-            selectedAuthors.style.display = 'none';
 
-            if (!selectedAuthors.parentElement) {
-                document.querySelector('form').appendChild(selectedAuthors);
-            }
 
-            var alreadySelected = Array.from(selectedAuthors.options).some(option => option.value == selectedOption.value);
-            if (alreadySelected) {
-                return;
-            }
-
-            var hiddenOption = document.createElement('option');
-            hiddenOption.value = selectedOption.value;
-            hiddenOption.text = selectedOption.text;
-            hiddenOption.selected = true;
-            selectedAuthors.appendChild(hiddenOption);
-
-            var tag = createTagElement(selectedOption.text, function() {
-                container.removeChild(tag);
-                hiddenOption.remove();
-            });
-
-            container.appendChild(tag);
-        }
-
-        function addTag() {
-            var select = document.getElementById('selectedTags');
-            var container = document.getElementById('selectedTagsTags');
-            var selectedOption = select.options[select.selectedIndex];
-            var selectedTags = document.getElementsByName('selectedTags')[0] || document.createElement('select');
-            selectedTags.setAttribute('name', 'selectedTags');
-            selectedTags.setAttribute('multiple', 'multiple');
-            selectedTags.style.display = 'none';
-
-            if (!selectedTags.parentElement) {
-                document.querySelector('form').appendChild(selectedTags);
-            }
-
-            var alreadySelected = Array.from(selectedTags.options).some(option => option.value == selectedOption.value);
-            if (alreadySelected) {
-                return;
-            }
-
-            var hiddenOption = document.createElement('option');
-            hiddenOption.value = selectedOption.value;
-            hiddenOption.text = selectedOption.text;
-            hiddenOption.selected = true;
-            selectedTags.appendChild(hiddenOption);
-
-            var tag = createTagElement(selectedOption.text, function() {
-                container.removeChild(tag);
-                hiddenOption.remove();
-            });
-
-            container.appendChild(tag);
-        }
     </script>
 </body>
 </html>

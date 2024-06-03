@@ -107,7 +107,7 @@ public class UserController {
                 String defaultAvatarPath = "/default/default-avatar.jpg";
                 user.setAvatar(defaultAvatarPath);
             }
-
+            
             userService.save(user);
 
             redirectAttributes.addFlashAttribute("successMessage", "Đã thêm người dùng thành công.");

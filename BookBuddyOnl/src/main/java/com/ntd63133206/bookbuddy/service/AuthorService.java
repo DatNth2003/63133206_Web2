@@ -3,7 +3,9 @@ package com.ntd63133206.bookbuddy.service;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -37,6 +39,9 @@ public class AuthorService {
 
     public Optional<Author> findByName(String name) {
         return authorRepository.findByName(name);
+    }
+    public Set<Author> getAuthorsByIds(List<Long> authorIds) {
+        return authorRepository.findAllById(authorIds).stream().collect(Collectors.toSet());
     }
 
     public void deleteById(Long id) {

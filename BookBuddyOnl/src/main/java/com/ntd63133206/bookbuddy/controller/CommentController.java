@@ -1,44 +1,47 @@
 package com.ntd63133206.bookbuddy.controller;
 
-import java.security.Principal;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.ntd63133206.bookbuddy.model.Comment;
 import com.ntd63133206.bookbuddy.model.User;
 import com.ntd63133206.bookbuddy.service.CommentService;
 import com.ntd63133206.bookbuddy.service.UserService;
 
+@Controller
 @RequestMapping("/comments")
 public class CommentController {
-	@Autowired
-	public CommentService commentService;
+    @Autowired
+    private CommentService commentService;
 
-	@Autowired
+    @Autowired
     private UserService userService;
-	
-	@PostMapping("/comments/{bookId}")
-	public String addComment(@PathVariable Long bookId, @ModelAttribute("comment") Comment comment, Principal principal) {
-	    if (comment == null || comment.getContent() == null || comment.getContent().isEmpty()) {
-	        return "redirect:/details/" + bookId;
-	    }
+    
+    @PostMapping("/add/{bookId}")
+    public String addComment(@PathVariable Long bookId,
+                             @RequestParam("content") String content,
+                             @AuthenticationPrincipal User user,
+                             RedirectAttributes redirectAttributes) {
+        if (user == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Bạn cần đăng nhập để thực hiện hành động này!");
+            return "redirect:/books/details/" + bookId;
+        }
 
-	    if (principal == null) {
-	        return "redirect:/books/details/" + bookId;
-	    }
-	    
-	    String username = principal.getName();
-	    User user = userService.getUserByUsername(username);
-	    Long userId = user.getId();
+        if (content == null || content.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Nội dung bình luận trống!");
+            return "redirect:/books/details/" + bookId;
+        }
 
-	    commentService.addComment(bookId, userId, comment.getContent());
+        Long userId = user.getId();
+        commentService.add(bookId, userId, content);
 
-	    return "redirect:/books/details/" + bookId;
-	}
-
+        return "redirect:/books/details/" + bookId;
+    }
 
 }

@@ -15,7 +15,8 @@ public class BookSearchCriteria {
     private int size;
     private String sortBy;
     private String sortOrder; 
-
+    private String sortField;
+    private String sortDirection; 
     public String getKeyword() {
         return keyword;
     }
@@ -88,7 +89,23 @@ public class BookSearchCriteria {
         this.sortOrder = sortOrder;
     }
 
-    public Map<String, Object> toSearchParams() {
+    public String getSortField() {
+		return sortField;
+	}
+
+	public void setSortField(String sortField) {
+		this.sortField = sortField;
+	}
+
+	public String getSortDirection() {
+		return sortDirection;
+	}
+
+	public void setSortDirection(String sortDirection) {
+		this.sortDirection = sortDirection;
+	}
+
+	public Map<String, Object> toSearchParams() {
         Map<String, Object> searchParams = new HashMap<>();
         if (keyword != null && !keyword.isEmpty()) {
             searchParams.put("keyword", keyword);

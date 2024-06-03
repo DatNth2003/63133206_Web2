@@ -35,6 +35,7 @@
 					data-bs-toggle="dropdown" aria-expanded="false">
 
                         <span th:text="${#authentication.name}"></span>
+                        
                         <img th:src="${#authentication.principal.avatar != null ? '/images/users/avatars/' + #authentication.principal.avatar : 'default/default-avatar.jpg'}"
      					th:alt="${#authentication.principal.avatar != null ? '/images/users/avatars/' + #authentication.principal.avatar : 'Ảnh đại diện mặc định'}"
      					class="avatar rounded-circle" style="width: 30px; height: 30px;">
@@ -42,9 +43,29 @@
 
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="userNavbarDropdown">
-    					<li><a class="dropdown-item" href="/account/profile"><i class="bi bi-person"></i> Profile</a></li>
-    					<li><a class="dropdown-item" href="/account/logout"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
-                    </ul>
+					    <li>
+					        <a class="dropdown-item" href="/account/profile">
+					            <i class="bi bi-person"></i> Profile
+					        </a>
+					    </li>
+					    <li>
+					        <div class="dropdown-divider"></div>
+					    </li>
+					    <li>
+					        <span class="dropdown-item">
+    							Số dư: <span th:text="${#numbers.formatDecimal(#authentication.principal.balance, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></span>
+					        </span>
+					    </li>
+					    <li>
+					        <div class="dropdown-divider"></div>
+					    </li>
+					    <li>
+					        <a class="dropdown-item" href="/account/logout">
+					            <i class="bi bi-box-arrow-right"></i> Logout
+					        </a>
+					    </li>
+					</ul>
+
                 </li>
 
                 <li sec:authorize="!isAuthenticated()" class="nav-item">

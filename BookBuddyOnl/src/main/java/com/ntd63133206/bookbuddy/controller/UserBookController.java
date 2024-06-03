@@ -1,6 +1,7 @@
 package com.ntd63133206.bookbuddy.controller;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -22,7 +23,6 @@ import com.ntd63133206.bookbuddy.dto.BookSearchCriteria;
 import com.ntd63133206.bookbuddy.model.Author;
 import com.ntd63133206.bookbuddy.model.Book;
 import com.ntd63133206.bookbuddy.model.Comment;
-import com.ntd63133206.bookbuddy.model.CustomUserDetails;
 import com.ntd63133206.bookbuddy.model.Purchase;
 import com.ntd63133206.bookbuddy.model.Tag;
 import com.ntd63133206.bookbuddy.model.User;
@@ -57,10 +57,19 @@ public class UserBookController {
     
     @Autowired
 	private PurchaseService purchaseService;
-    
+    @GetMapping("/my-books")
+    public String showUserBooks(Model model, @AuthenticationPrincipal User user) {
+        if (user != null) {
+            List<Book> favoriteBooks = favoriteService.getFavoriteBooks(user.getUsername());
+            List<Book> purchasedBooks = purchaseService.getPurchasedBooks(user.getUsername());
+            model.addAttribute("favoriteBooks", favoriteBooks);
+            model.addAttribute("purchasedBooks", purchasedBooks);
+        }
+        return "books/my-books";
+    }
     @GetMapping(value = {"", "/"})
     public String searchBooks(@ModelAttribute("searchCriteria") BookSearchCriteria searchCriteria, 
-                              @AuthenticationPrincipal CustomUserDetails customUserDetails, 
+                              @AuthenticationPrincipal User user, 
                               Model model) {
         int pageSize = 10;
         PageRequest pageable = PageRequest.of(searchCriteria.getPage(), pageSize);
@@ -69,10 +78,10 @@ public class UserBookController {
         List<Author> authors = authorService.findAll();
         List<Tag> tags = tagService.getAllTags();
         
-        if (customUserDetails != null) {
-            String username = customUserDetails.getUsername();
+        if (user != null) {
+            String username = user.getUsername();
             books.forEach(book -> {
-                boolean isFavorite = favoriteService.isBookFavoriteForUser(book.getId(), username);
+            	boolean isFavorite = favoriteService.isBookFavoriteForUser(book.getId(), username);
                 book.setFavorite(isFavorite);
             });
         }
@@ -84,35 +93,16 @@ public class UserBookController {
         return "books/search-book";
     }
 
+    @GetMapping("/read/{bookId}")
+    public String readBook(@PathVariable Long bookId, Model model, @AuthenticationPrincipal User user) {
+        Book book = bookService.findById(bookId)
+                               .orElseThrow(() -> new IllegalArgumentException("Invalid book Id:" + bookId));
 
-	@GetMapping("/read")
-    public String readPdf(Model model) {
-        String pdfPath = "4093492f-b2cb-4798-b357-35322d455b56_Test.pdf";
-        model.addAttribute("pdfPath", pdfPath);
-        return "/books/read-book";
-    }
-
-	@GetMapping("/read/{bookId}")
-    public String readBook(@PathVariable Long bookId, Model model, Principal principal) {
-        Optional<Book> optionalBook = bookService.findById(bookId);
-
-        if (!optionalBook.isPresent()) {
-            System.out.println("Không tìm thấy sách có ID: " + bookId);
-            return "redirect:/books";
-        }
-
-        Book book = optionalBook.get();
-        String username = principal.getName();
-        User user = userService.getUserByUsername(username);
-        
-        Optional<Purchase> optionalPurchase = purchaseService.findByUserAndBook(user, book);
-
-        if (optionalPurchase.isPresent() && optionalPurchase.get().getStatus() == Purchase.Status.SUCCESS) {
-            String pdfPath = "pdfs/" + book.getPdfPath();
-            model.addAttribute("pdfPath", pdfPath);
+        if (book.getPrice() == 0 || purchaseService.isBookPurchasedByUser(bookId, user.getUsername())) {
+            String pdfPath = "/pdfs/" + book.getPdfPath();
             model.addAttribute("book", book);
+            model.addAttribute("pdfPath", pdfPath);
             System.out.println("Load pdf: " + pdfPath);
-
             return "books/read-book";
         } else {
             System.out.println("Người dùng chưa mua sách hoặc giao dịch chưa thành công cho sách có ID: " + bookId);
@@ -121,38 +111,68 @@ public class UserBookController {
     }
 
 
-	@GetMapping("/details/{bookId}")
-	public String showBookDetails(@PathVariable("bookId") Long bookId,
-	                               Model model,
-	                               @AuthenticationPrincipal CustomUserDetails customUserDetails,
-	                               @RequestParam(name = "page", defaultValue = "0") int page,
-	                               @RequestParam(name = "size", defaultValue = "10") int size,
-	                               @RequestParam(name = "sortBy", defaultValue = "createdAt") String sortBy,
-	                               @RequestParam(name = "orderBy", defaultValue = "desc") String orderBy) {
-	    if (customUserDetails == null) {
-	        return "redirect:/account/login";
-	    }
 
-	    Book book = bookService.getBookById(bookId);
-	    if (book == null) {
-	        model.addAttribute("errorMessage", "Sách không tồn tại.");
-	        return "books/book-details";
-	    }
-	    Set<Author> authors = book.getAuthors();
-	    Set<Tag> tags = book.getTags();
-	    Page<Comment> commentPage = commentService.getCommentsByBookId(bookId, page, size, sortBy, orderBy);
-	    boolean isFavorite = favoriteService.isBookFavoriteForUser(bookId, customUserDetails.getUsername());
-	    model.addAttribute("book", book);
-	    model.addAttribute("isFavorite", isFavorite);
-	    model.addAttribute("authors", authors);
-	    model.addAttribute("tags", tags);
-	    model.addAttribute("comments", commentPage.getContent());
-	    model.addAttribute("totalPages", commentPage.getTotalPages());
-	    model.addAttribute("currentPage", commentPage.getNumber());
-	    model.addAttribute("sortBy", sortBy);
-	    model.addAttribute("orderBy", orderBy);
-	    return "books/book-details";
-	}
+    @GetMapping("/details/{bookId}")
+    public String showBookDetails(@PathVariable("bookId") Long bookId,
+                                   Model model,
+                                   @AuthenticationPrincipal User user,
+                                   @RequestParam(value = "purchaseSuccessMessage", required = false) String purchaseSuccessMessage,
+                                   @RequestParam(name = "page", defaultValue = "0") int page,
+                                   @RequestParam(name = "size", defaultValue = "10") int size,
+                                   @RequestParam(name = "sortBy", defaultValue = "createdAt") String sortBy,
+                                   @RequestParam(name = "orderBy", defaultValue = "desc") String orderBy) {
+
+        Book book = bookService.getBookById(bookId);
+        if (book == null) {
+            model.addAttribute("errorMessage", "Sách không tồn tại.");
+            return "books/book-details";
+        }
+
+        Set<Author> authors = book.getAuthors();
+        Set<Tag> tags = book.getTags();
+        Page<Comment> commentPage = commentService.getCommentsByBookId(bookId, page, size, sortBy, orderBy);
+        model.addAttribute("book", book);
+        model.addAttribute("authors", authors);
+        model.addAttribute("tags", tags);
+        model.addAttribute("size", size);
+        model.addAttribute("comments", commentPage.getContent());
+        model.addAttribute("totalPages", commentPage.getTotalPages());
+        model.addAttribute("currentPage", commentPage.getNumber());
+        model.addAttribute("sortBy", sortBy);
+        model.addAttribute("orderBy", orderBy);
+
+        boolean isBookInFavorites = false;
+        if (user != null) {
+            System.out.print(user.getUsername() + " đang xem chi tiết sách!");
+            isBookInFavorites = favoriteService.isBookFavoriteForUser(bookId, user.getUsername());
+        } else {
+            System.out.print("User bị null!");
+        }
+        model.addAttribute("isBookInFavorites", isBookInFavorites);
+
+        boolean isBookPaidFor = false;
+        if (user != null && user.getId() != null) {
+            if (book.getPrice() > 0) {
+                isBookPaidFor = purchaseService.isBookPurchasedByUser(bookId, user.getUsername());
+                System.out.println("Người dùng đã mua: " + isBookPaidFor);
+            } else {
+                isBookPaidFor = true;
+            }
+        } else {
+            System.out.println("Người dùng chưa đăng nhập nên chưa mua!");
+        }
+
+        model.addAttribute("isBookPaidFor", isBookPaidFor);
+
+        if (user != null && user.getBalance() < book.getPrice() && book.getPrice() > 0) {
+            model.addAttribute("insufficientBalanceMessage", "Số dư không đủ để mua cuốn sách này");
+        }
+        if (purchaseSuccessMessage != null) {
+            model.addAttribute("purchaseSuccessMessage", purchaseSuccessMessage);
+        }
+        return "books/book-details";
+    }
+
 
 
 

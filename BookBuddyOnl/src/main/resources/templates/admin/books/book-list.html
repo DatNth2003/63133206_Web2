@@ -117,6 +117,20 @@
                 </div>
             </form>
         </div>
+		<div class="mb-3 d-flex justify-content-end">
+		    <form th:action="@{/admin/books}" method="get">
+		        <div class="input-group">
+		            <label class="input-group-text">Kích thước trang:</label>
+		            <select class="form-select form-select-sm" name="size" onchange="this.form.submit()">
+		                <option value="5" th:selected="${searchCriteria.size == 5}">5</option>
+		                <option value="10" th:selected="${searchCriteria.size == 10}">10</option>
+		                <option value="15" th:selected="${searchCriteria.size == 15}">15</option>
+						<option value="25" th:selected="${searchCriteria.size == 15}">25</option>
+		                
+		            </select>
+		        </div>
+		    </form>
+		</div>
 
         <div class="books-display-section">
         <div th:if="${books.empty}" class="text-center">Không tìm thấy sách phù hợp</div>
@@ -124,16 +138,18 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th>Ảnh bìa</th>
-                        <th>Tên sách</th>
-                        <th>Mô tả</th>
-                        <th>Tác giả</th>
-                        <th>Giá</th>
-                        <th>Thao tác</th>
+        				<th class="sortable" data-sort="id">ID</th>
+						<th class="sortable" data-sort="cover">Ảnh bìa</th>
+						<th class="sortable" data-sort="title">Tên sách</th>
+						<th class="sortable" data-sort="description">Mô tả</th>
+  						<th class="sortable" data-sort="authors">Tác giả</th>
+						<th class="sortable" data-sort="price">Giá</th>
+						<th>Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr th:each="book : ${books}">
+                        <td th:text="${book.id}"></td>
                         <td><img th:src="@{'/images/books/covers/' + (${book.coverImage} ? ${book.coverImage} : 'default/default.png')}" alt="Book cover" style="max-width: 100px;"></td>
                         <td th:text="${book.title}"></td>
                         <td th:text="${book.description}"></td>
@@ -164,7 +180,7 @@
                     </li>
                     <li class="page-item"><a class="page-link" th:href="@{'?page=' + ${books.totalPages - 1}}">Last</a></li>
                 </ul>
-            </div>a
+            </div>
         </div>
     </div>
 </div>
@@ -252,6 +268,21 @@
             var selectedIds = Array.from(document.querySelectorAll(itemClass)).map(tag => tag.dataset.id).join(',');
             document.getElementsByName(inputName)[0].value = selectedIds;
         }
+        $(document).ready(function() {
+            $('#selectedAuthors').select2();
+            $('#selectedTags').select2();
+
+            $('.sortable').on('click', function() {
+                var column = $(this).data('sort');
+                var order = $(this).hasClass('asc') ? 'desc' : 'asc';
+
+                $('.sortable').removeClass('asc desc');
+                $(this).addClass(order);
+
+                window.location.href = '?sort=' + column + '&order=' + order;
+            });
+        });
+
     </script>
 </body>
 </html>

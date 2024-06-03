@@ -4,32 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý người dùng</title>
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-	<link href="/css/admin/user-form.css" rel="stylesheet">
-
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/css/admin/user-form.css" rel="stylesheet">
     <style>
-    .body{
-	    margin: 0;
-	    padding: 0;
-    }
-	.role-admin {
-    	background-color: red;
-	}
-
-	.role-normal {
-    	background-color: gray;
-	}
+        .body {
+            margin: 0;
+            padding: 0;
+        }
+        .role-admin {
+            background-color: red;
+        }
+        .role-normal {
+            background-color: gray;
+        }
     </style>
 </head>
 <body>
-    <th:block th:replace="~{/admin/fragments/navbar :: nav}" ></th:block>
+    <th:block th:replace="~{/admin/fragments/navbar :: nav}"></th:block>
     <div class="container m-0 p-0">
         <div class="row">
             <div class="col col-md-2">
-			<th:block th:replace="~{/admin/fragments/sidebar :: main}" ></th:block>
+                <th:block th:replace="~{/admin/fragments/sidebar :: main}"></th:block>
             </div>
-            
             <div class="col col-md-10 container-custom mt-5">
                 <h2>Danh sách người dùng</h2>
                 <form th:action="@{/admin/users/}" method="get">
@@ -37,25 +34,26 @@
                         <div class="form-group col-md-3">
                             <input type="text" class="form-control" name="keyword" placeholder="Từ khóa tìm kiếm" size="50" th:value="${keyword}">
                         </div>
-						<div class="form-group col-md-3">
-                        	<select class="form-select" name="role">
-    							<option value="">Tất cả vai trò</option>
-    							<option th:each="role : ${roles}" th:value="${role.id}" th:text="${role.name}" th:selected="${role.id == selectedRoleId}"></option>
-							</select>
-						</div>
+                        <div class="form-group col-md-3">
+                            <select class="form-select" name="role">
+                                <option value="">Tất cả vai trò</option>
+                                <option th:each="role : ${roles}" th:value="${role.id}" th:text="${role.name}" th:selected="${role.id == selectedRoleId}"></option>
+                            </select>
+                        </div>
                         <div class="form-group col-md-2 m-md-1">
-    						<button type="submit" class="btn btn-primary"><i class="bi bi-search"></i></button>
-    						<a href="/admin/users/add" class="btn btn-success"><i class="bi bi-plus"></i> Add User</a>
-						</div>
-					</div>
+                            <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i></button>
+                            <a href="/admin/users/add" class="btn btn-success"><i class="bi bi-plus"></i> Add User</a>
+                        </div>
+                    </div>
                 </form>
+                <div th:if="${message}" class="alert alert-warning" role="alert" th:text="${message}"></div>
                 <table class="table">
                     <thead>
                         <tr>
                             <th><a href="?sort=id">ID</a></th>
-                        	<th><a href="?sort=email">Email</a></th>
-                        	<th><a href="?sort=username">Username</a></th>
-                        	<th><a href="?sort=role">Role</a></th>
+                            <th><a href="?sort=email">Email</a></th>
+                            <th><a href="?sort=username">Username</a></th>
+                            <th><a href="?sort=role">Role</a></th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -69,17 +67,15 @@
                             <td th:text="${user.username}"></td>
                             <td>
                                 <span th:each="role : ${user.roles}">
-    								<span th:text="${role['name']}" 
-									th:class="${role['name'] == 'ROLE_ADMIN'} ? 'badge badge-primary role-admin' : 'badge badge-primary role-normal'"></span>
-								</span>
-
+                                    <span th:text="${role['name']}"
+                                          th:class="${role['name'] == 'ROLE_ADMIN'} ? 'badge badge-primary role-admin' : 'badge badge-primary role-normal'"></span>
+                                </span>
                                 <span th:if="${#lists.isEmpty(user.roles)}">No roles</span>
                             </td>
-                             <td>
-    							<a th:href="@{/admin/users/edit/{id}(id=${user.id})}" class="btn btn-primary"><i class="bi bi-pencil"></i></a>
-    							<a th:href="@{/admin/users/delete/{id}(id=${user.id})}" class="btn btn-danger"><i class="bi bi-trash"></i></a>
-							</td>
-
+                            <td>
+                                <a th:href="@{/admin/users/edit/{id}(id=${user.id})}" class="btn btn-primary"><i class="bi bi-pencil"></i></a>
+                                <a th:href="@{/admin/users/delete/{id}(id=${user.id})}" class="btn btn-danger"><i class="bi bi-trash"></i></a>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -103,8 +99,7 @@
             </div>
         </div>
     </div>
-
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
     <script type="text/javascript">
         function clearSearch() {
@@ -113,7 +108,6 @@
         function submitForm() {
             var keyword = document.getElementsByName("keyword")[0].value;
             var role = document.getElementsByName("role")[0].value;
-
             window.location.href = "/admin/users?keyword=" + keyword + "&role=" + role;
         }
     </script>

@@ -8,6 +8,7 @@ import com.ntd63133206.bookbuddy.repository.CommentRepository;
 import com.ntd63133206.bookbuddy.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -15,6 +16,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class CommentService {
@@ -25,7 +28,7 @@ public class CommentService {
     @Autowired
     private UserRepository userRepository;
 
-    public Comment addComment(Long bookId, Long userId, String content) {
+    public Comment add(Long bookId, Long userId, String content) {
         Book book = bookRepository.findById(bookId).orElseThrow(() -> new IllegalArgumentException("Book not found"));
         User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
 
@@ -38,12 +41,23 @@ public class CommentService {
         return commentRepository.save(comment);
     }
 
-    public void deleteComment(Long commentId) {
+    public void delete(Long commentId) {
         commentRepository.deleteById(commentId);
     }
     public Page<Comment> getCommentsByBookId(Long bookId, int page, int size, String sortBy, String orderBy) {
         Sort.Direction direction = Sort.Direction.fromString(orderBy);
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
-        return commentRepository.findByBookId(bookId, pageable);
+        Page<Comment> commentsPage = commentRepository.findByBookId(bookId, pageable);
+
+        List<Comment> comments = commentsPage.getContent().stream()
+                .filter(comment -> comment.getUser() != null && userRepository.existsById(comment.getUser().getId()))
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(comments, pageable, comments.size());
     }
+
+
+
+
+
 }

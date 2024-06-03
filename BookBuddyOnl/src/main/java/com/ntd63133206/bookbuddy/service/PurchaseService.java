@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import com.ntd63133206.bookbuddy.model.Book;
 import com.ntd63133206.bookbuddy.model.Purchase;
 import com.ntd63133206.bookbuddy.model.User;
+import com.ntd63133206.bookbuddy.repository.BookRepository;
 import com.ntd63133206.bookbuddy.repository.PurchaseRepository;
 
 import java.time.LocalDateTime;
@@ -17,45 +18,44 @@ public class PurchaseService {
 
     @Autowired
     private PurchaseRepository purchaseRepository;
+    @Autowired
+    private BookRepository bookRepository;
     
     public List<Purchase> getAllPurchases() {
         return purchaseRepository.findAll();
     }
 
-    public void updatePurchaseStatus(Long purchaseId, String statusStr) {
-        Optional<Purchase> optionalPurchase = purchaseRepository.findById(purchaseId);
-        if (optionalPurchase.isPresent()) {
-            Purchase purchase = optionalPurchase.get();
-            Purchase.Status status = Purchase.Status.valueOf(statusStr);
-            purchase.setStatus(status);
-            purchaseRepository.save(purchase);
+
+    public Purchase createPurchase(User user, Book book) {
+        if (isBookPurchasedByUser(book.getId(), user.getUsername())) {
+            return null;
         } else {
-            throw new IllegalArgumentException("Purchase not found with ID: " + purchaseId);
+            Purchase purchase = new Purchase();
+            purchase.setUser(user);
+            purchase.setBook(book);
+            purchase.setPurchaseDate(LocalDateTime.now());
+            return purchaseRepository.save(purchase);
         }
     }
 
-    public Purchase createPurchase(User user, Book book) {
-        Purchase purchase = new Purchase();
-        purchase.setUser(user);
-        purchase.setBook(book);
-        purchase.setPurchaseDate(LocalDateTime.now());
-        purchase.setStatus(Purchase.Status.PENDING);
-
-        return purchaseRepository.save(purchase);
-    }
 
     public Optional<Purchase> findByUserAndBook(User user, Book book) {
         return purchaseRepository.findByUserAndBook(user, book);
     }
 
-    public Purchase updateStatus(Long purchaseId, Purchase.Status status) {
-        Optional<Purchase> optionalPurchase = purchaseRepository.findById(purchaseId);
-        if (optionalPurchase.isPresent()) {
-            Purchase purchase = optionalPurchase.get();
-            purchase.setStatus(status);
+    public Purchase save(Purchase purchase) {
+        if (purchase.getId() == null || !purchaseRepository.existsById(purchase.getId())) {
             return purchaseRepository.save(purchase);
         } else {
-            throw new IllegalArgumentException("Purchase not found");
+            throw new IllegalArgumentException("Id đã tồn tại, không thể lưu lại đối tượng Purchase.");
         }
+    }
+
+
+    public List<Book> getPurchasedBooks(String username) {
+        return purchaseRepository.findBooksByUsername(username);
+    }
+    public boolean isBookPurchasedByUser(Long bookId, String username) {
+        return purchaseRepository.existsByBookIdAndUserUsername(bookId, username);
     }
 }

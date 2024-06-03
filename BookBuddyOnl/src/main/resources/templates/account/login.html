@@ -9,11 +9,11 @@
         body {
             background-color: #f8f9fa;
         }
-        .container-custom {
+        .container {
             border: 1px solid #dee2e6;
             border-radius: 10px;
             padding: 30px;
-            margin-top: 50px;
+            margin-top: 100px;
             background-color: #fff;
             box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1);
             position: relative;
@@ -36,7 +36,7 @@
             border: 2px solid #ced4da;
             border-radius: 50%;
             overflow: hidden;
-        }
+        }	
         .avatar-container img {
             width: 100%;
             height: auto;
@@ -44,9 +44,8 @@
     </style>
 </head>
 <body>
-
     <th:block th:replace="~{/fragments/user_navbar :: nav}"></th:block>
-    <div class="container container-custom">
+    <div class="container">
         <div class="avatar-container">
             <img src="/images/users/avatars/default/default-avatar.jpg" alt="Default Avatar">
         </div>
@@ -54,13 +53,13 @@
             <div class="col-md-6">
                 <h2 class="mb-4">Login</h2>
                 <form th:action="@{/account/login}" method="post">
-                    <div th:if="${error}" class="alert alert-danger">
-                        <p th:text="${error}"></p>
+                     <div th:if="${param.error}" class="alert alert-danger">
+                        <p>Invalid username or password!</p>
                     </div>
 
                     <div class="mb-3">
                         <label>Email:</label>
-                        <input type="text" class="form-control" name="username" required>
+                        <input type="text" class="form-control" name="email" required>
                     </div>
                     <div class="mb-3">
                         <label>Password:</label>

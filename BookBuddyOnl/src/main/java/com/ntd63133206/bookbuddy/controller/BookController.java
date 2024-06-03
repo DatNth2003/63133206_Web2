@@ -24,11 +24,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.ntd63133206.bookbuddy.dto.BookSearchCriteria;
 import com.ntd63133206.bookbuddy.model.Author;
 import com.ntd63133206.bookbuddy.model.Book;
-import com.ntd63133206.bookbuddy.model.CustomUserDetails;
 import com.ntd63133206.bookbuddy.model.Tag;
 import com.ntd63133206.bookbuddy.service.AuthorService;
 import com.ntd63133206.bookbuddy.service.BookService;
 import com.ntd63133206.bookbuddy.service.TagService;
+import com.ntd63133206.bookbuddy.util.Utility;
 
 import jakarta.validation.Valid;
 
@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -92,10 +93,18 @@ public class BookController {
         Book book = bookService.getBookById(id);
         List<Author> authors = authorService.findAll();
         List<Tag> tags = tagService.getAllTags();
+        
+        if(authors == null) {
+            authors = new ArrayList<>();
+        }
+        if(tags == null) {
+            tags = new ArrayList<>();
+        }
+        
         model.addAttribute("book", book);
         model.addAttribute("authors", authors);
         model.addAttribute("tags", tags);
-        return "/admin/books/edit-book";
+        return "admin/books/edit-book";
     }
 
     @PostMapping("/edit/{id}")
@@ -103,9 +112,12 @@ public class BookController {
                            @ModelAttribute Book book,
                            @RequestParam("coverImageFile") MultipartFile coverImage, 
                            @RequestParam("pdfFile") MultipartFile pdfFile, 
+                           @RequestParam("selectedAuthors") List<Long> authorIds, 
                            Model model) {
         try {
-            bookService.updateBookDetails(id, book, coverImage, pdfFile);
+            Set<Author> authors = authorService.getAuthorsByIds(authorIds);
+            
+            bookService.updateBookDetails(id, book, coverImage, pdfFile, authors);
         } catch (IOException e) {
             e.printStackTrace();
             model.addAttribute("error", "An error occurred while uploading files.");
@@ -119,8 +131,22 @@ public class BookController {
     @GetMapping(value = {"", "/"})
     public String searchBooks(@ModelAttribute("searchCriteria") BookSearchCriteria searchCriteria, 
                               Model model) {
-        int pageSize = 10;
-        PageRequest pageable = PageRequest.of(searchCriteria.getPage(), pageSize);
+        int defaultPageSize = 10;
+        searchCriteria.setSize(searchCriteria.getSize() == 0 ? defaultPageSize : searchCriteria.getSize());
+
+        if (Utility.isNullOrEmpty(searchCriteria.getSortField())) {
+            searchCriteria.setSortField("updatedAt");
+        }
+
+        Sort.Direction direction = Sort.Direction.ASC;
+        if (searchCriteria.getSortDirection() != null && searchCriteria.getSortDirection().equalsIgnoreCase("desc")) {
+            direction = Sort.Direction.DESC;
+        }
+
+        Sort sort = Sort.by(direction, searchCriteria.getSortField());
+
+        PageRequest pageable = PageRequest.of(searchCriteria.getPage(), searchCriteria.getSize(), sort);
+
         Page<Book> books = bookService.searchBooks(searchCriteria, pageable);
         
         List<Author> authors = authorService.findAll();

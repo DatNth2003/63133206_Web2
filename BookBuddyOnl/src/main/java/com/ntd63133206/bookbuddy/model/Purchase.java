@@ -1,5 +1,6 @@
 package com.ntd63133206.bookbuddy.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -13,7 +14,7 @@ import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "purchase")
+@Table(name = "purchases")
 public class Purchase {
 
     @Id
@@ -28,16 +29,8 @@ public class Purchase {
     @JoinColumn(name = "book_id")
     private Book book;
 
+    @Column(name = "purchase_date")
     private LocalDateTime purchaseDate;
-
-    @Enumerated(EnumType.STRING)
-    private Status status;
-
-    public enum Status {
-        PENDING,
-        SUCCESS,
-        DENIED
-    }
 
     public Long getId() {
         return id;
@@ -71,11 +64,4 @@ public class Purchase {
         this.purchaseDate = purchaseDate;
     }
 
-    public Status getStatus() {
-        return status;
-    }
-
-    public void setStatus(Status status) {
-        this.status = status;
-    }
 }

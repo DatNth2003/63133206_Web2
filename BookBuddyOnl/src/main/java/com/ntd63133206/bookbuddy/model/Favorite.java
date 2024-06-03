@@ -1,5 +1,8 @@
 package com.ntd63133206.bookbuddy.model;
 
+import java.time.LocalDateTime;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -23,6 +26,9 @@ public class Favorite {
     @JoinColumn(name = "book_id", nullable = false)
     private Book book;
 
+    @Column(name = "fav_date")
+    private LocalDateTime favDate;
+    
 	public Long getId() {
 		return id;
 	}
@@ -45,6 +51,14 @@ public class Favorite {
 
 	public void setBook(Book book) {
 		this.book = book;
+	}
+
+	public LocalDateTime getFavDate() {
+		return favDate;
+	}
+
+	public void setFavDate(LocalDateTime favDate) {
+		this.favDate = favDate;
 	}
     
 }

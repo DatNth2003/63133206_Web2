@@ -11,6 +11,7 @@ import com.ntd63133206.bookbuddy.repository.BookRepository;
 import com.ntd63133206.bookbuddy.repository.FavoriteRepository;
 import com.ntd63133206.bookbuddy.repository.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -45,15 +46,19 @@ public class FavoriteService {
         if (user != null && book != null) {
             boolean isFavorite = favoriteRepository.existsByUserAndBook(user, book);
             if (isFavorite) {
+                System.out.println("Hủy Fav cho " + username + " với sách ID " + bookId);
                 favoriteRepository.deleteByUserAndBook(user, book);
             } else {
+                System.out.println("Tạo Fav cho " + username + " với sách ID " + bookId);
                 Favorite favorite = new Favorite();
                 favorite.setUser(user);
                 favorite.setBook(book);
+                favorite.setFavDate(LocalDateTime.now());
                 favoriteRepository.save(favorite);
             }
         }
     }
+
 
     public boolean isBookFavoriteForUser(Long bookId, String username) {
         User user = userRepository.findByUsername(username);

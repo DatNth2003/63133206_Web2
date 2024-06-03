@@ -7,6 +7,7 @@
     <title>BookBuddy - Trang chủ</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
         .container-custom {
             border: 1px solid #dee2e6;
@@ -14,19 +15,23 @@
             padding: 20px;
             margin-top: 50px;
         }
+
         .carousel-item img {
             border-radius: 10px;
         }
+
         .carousel-caption {
             background-color: rgba(0, 0, 0, 0.5);
             border-radius: 10px;
             color: white;
             padding: 10px;
         }
+
         .book-card {
             text-align: center;
             position: relative;
         }
+
         .book-actions {
             position: absolute;
             top: 50%;
@@ -35,19 +40,44 @@
             opacity: 0;
             transition: opacity 0.3s;
         }
+
         .book-card:hover .book-actions {
             opacity: 1;
         }
+
         .like-icon {
-            font-size: 24px;
             color: red;
         }
+
         .like-icon.not-liked {
             color: black;
         }
+
         .carousel-control-prev,
         .carousel-control-next {
             width: 5%;
+        }
+
+        .select2-container .select2-selection--single {
+            height: 40px;
+            line-height: 40px;
+        }
+
+        .select2-container .select2-selection__rendered {
+            line-height: 40px;
+        }
+
+        .select2-container .select2-selection__arrow {
+            height: 40px;
+        }
+        #bookCarousel {
+            max-width: 90%;
+            margin: 0 auto;
+        }
+
+        #bookCarousel .carousel-item img {
+            height: 300px;
+            object-fit: cover;
         }
     </style>
 </head>
@@ -56,34 +86,36 @@
 
     <main>
         <div class="container mt-4">
-            <div id="carouselExampleControls" class="carousel slide" data-bs-ride="carousel">
-                <div class="carousel-inner">
-                    <div class="carousel-item active">
-                        <img src="https://via.placeholder.com/800x400" class="d-block w-100" alt="...">
-                    </div>
-                    <div class="carousel-item">
-                        <img src="https://via.placeholder.com/800x400" class="d-block w-100" alt="...">
-                    </div>
-                    <div class="carousel-item">
-                        <img src="https://via.placeholder.com/800x400" class="d-block w-100" alt="...">
-                    </div>
-                </div>
-                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">
-                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                    <span class="visually-hidden">Previous</span>
-                </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="next">
-                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                    <span class="visually-hidden">Next</span>
-                </button>
-            </div>
-        </div>
+        
+		    <div id="bookCarousel" class="carousel slide" data-bs-ride="carousel">
+		        <div class="carousel-inner">
+		            <div class="carousel-item active">
+		                <img src="https://via.placeholder.com/800x400" class="d-block w-100" alt="...">
+		            </div>
+		            <div class="carousel-item">
+		                <img src="https://via.placeholder.com/800x400" class="d-block w-100" alt="...">
+		            </div>
+		            <div class="carousel-item">
+		                <img src="https://via.placeholder.com/800x400" class="d-block w-100" alt="...">
+		            </div>
+		        </div>
+		        <button class="carousel-control-prev" type="button" data-bs-target="#bookCarousel" data-bs-slide="prev">
+		            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+		            <span class="visually-hidden">Previous</span>
+		        </button>
+		        <button class="carousel-control-next" type="button" data-bs-target="#bookCarousel" data-bs-slide="next">
+		            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+		            <span class="visually-hidden">Next</span>
+		        </button>
+		    </div>
+		</div>
+
         <div class="container mt-5">
             <h2>Chào mừng đến với BookBuddy</h2>
             <p>BookBuddy là nơi bạn có thể tìm kiếm và chia sẻ những cuốn sách yêu thích của mình.</p>
-        </div>
-       <div class="container mt-5">
-		    <h2>Sách mới nhất</h2>
+		</div>
+		<div class="container mt-5">
+			<h2>Sách mới nhất</h2>
 		    <div th:if="${not #lists.isEmpty(partitionedBooks)}">
 		        <div id="latestBooksCarousel" class="carousel slide" data-bs-ride="carousel">
 		            <div class="carousel-inner">
@@ -101,15 +133,18 @@
     											<p class="card-text" th:if="${book.description != null}" th:text="${book.description}"></p>
     											<p class="card-text" th:if="${book.description == null}">Không có mô tả</p>
 		                                    </div>
-		                                    <div class="book-actions">
-			                                    <a th:href="@{/books/details/{id}(id=${book.id})}" class="btn btn-primary btn-sm" title="Chi tiết"><i class="bi bi-info-circle"></i></a>
-												<form action="/favorites/${book.id}" method="post">
-												    <button type="submit" class="btn btn-danger btn-sm like-icon not-liked">
-												        <i class="bi bi-heart"></i>
-												    </button>
+											<div class="book-actions d-flex flex-column align-items-center">
+											    <a th:href="@{/books/details/{id}(id=${book.id})}" class="btn btn-outline-primary btn-sm mb-2 flex-fill d-flex justify-content-center align-items-center" title="Chi tiết"><i class="bi bi-info-circle me-1"></i> Detail</a>
+											    <form th:action="@{/favorites/{bookId}(bookId=${book.id})}" method="post">
+												    <input type="hidden" name="redirectUrl" th:value="@{/books}">
+												    <button type="submit" class="btn btn-sm like-icon flex-fill d-flex justify-content-center align-items-center"
+												            th:classappend="${favoriteStatusMap[book.id]} ? 'btn-danger' : 'btn-outline-danger'" style="gap: 5px;">
+												        <i class="bi" th:classappend="${favoriteStatusMap[book.id]} ? 'bi-heart-fill' : 'bi-heart me-1'"></i>
+												        <span th:text="${favoriteStatusMap[book.id]} ? 'Đã yêu thích' : 'Yêu thích'"></span>
+												    </button>	
 												</form>
-			                                </div>
-		                                    <div th:if="${iterStat.count % 4 == 0}" class="w-100 d-none d-md-block"></div>
+											</div>
+		                                    <div th:if="${iterStat.count % 4 == 0}" class="w-100"></div> 
 		                                </div>
 		                            </div>
 		                        </div>
@@ -126,18 +161,80 @@
 		            </button>
 		        </div>
 		    </div>
+		    <div th:if="${#lists.isEmpty(partitionedBooks)}" class="alert alert-info mt-3" role="alert">
+		        Không có sách nào được tìm thấy.
+		    </div>
 		</div>
-
-
-		<div class="container mt-5" th:if="${#lists.isEmpty(partitionedBooks)}">
-		    <p>Chưa có sách.</p>
-		</div>
-
     </main>
-    <footer>
-        <p>&copy; 2024 BookBuddy. All rights reserved.</p>
-    </footer>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#selectedAuthors').select2({
+                dropdownParent: $('#selectedAuthors').parent()
+            });
+            $('#selectedTags').select2({
+                dropdownParent: $('#selectedTags').parent()
+            });
+        });
+
+        function addAuthor() {
+            const select = document.getElementById('selectedAuthors');
+            const selectedAuthorId = select.value;
+            const selectedAuthorText = select.options[select.selectedIndex].text;
+
+            if (selectedAuthorId) {
+                const tagsContainer = document.getElementById('selectedAuthorsTags');
+                const existingTag = tagsContainer.querySelector(`span[data-id="${selectedAuthorId}"]`);
+                if (!existingTag) {
+                    const span = document.createElement('span');
+                    span.className = 'badge bg-primary';
+                    span.dataset.id = selectedAuthorId;
+                    span.innerHTML = `${selectedAuthorText} <button type="button" class="btn-close" aria-label="Close" onclick="removeTag(this, 'authorIds')"></button>`;
+                    tagsContainer.appendChild(span);
+
+                    updateHiddenField('selectedAuthorsTags', 'authorIds');
+                }
+            }
+        }
+
+        function addTag() {
+            const select = document.getElementById('selectedTags');
+            const selectedTagId = select.value;
+            const selectedTagText = select.options[select.selectedIndex].text;
+
+            if (selectedTagId) {
+                const tagsContainer = document.getElementById('selectedTagsTags');
+                const existingTag = tagsContainer.querySelector(`span[data-id="${selectedTagId}"]`);
+                if (!existingTag) {
+                    const span = document.createElement('span');
+                    span.className = 'badge bg-secondary';
+                    span.dataset.id = selectedTagId;
+                    span.innerHTML = `${selectedTagText} <button type="button" class="btn-close" aria-label="Close" onclick="removeTag(this, 'tagIds')"></button>`;
+                    tagsContainer.appendChild(span);
+
+                    updateHiddenField('selectedTagsTags', 'tagIds');
+                }
+            }
+        }
+
+        function removeTag(button, hiddenFieldId) {
+            const tag = button.parentNode;
+            tag.parentNode.removeChild(tag);
+            updateHiddenField(button.parentNode.parentNode.id, hiddenFieldId);
+        }
+
+        function updateHiddenField(tagsContainerId, hiddenFieldId) {
+            const tagsContainer = document.getElementById(tagsContainerId);
+            const hiddenField = document.getElementsByName(hiddenFieldId)[0];
+            const tags = tagsContainer.querySelectorAll('span');
+            const ids = Array.from(tags).map(tag => tag.dataset.id);
+            hiddenField.value = ids.join(',');
+        }
+    </script>
+    
+	<div th:replace="~{/fragments/user_footer :: footer}"></div>
+    
 </body>
 </html>

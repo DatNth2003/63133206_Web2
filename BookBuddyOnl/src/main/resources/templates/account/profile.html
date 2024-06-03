@@ -29,7 +29,6 @@
 <th:block th:replace="~{/fragments/user_navbar :: nav}" ></th:block>
 
 <div class="container mt-4">
-    <!-- User Profile Form -->
     <form action="/account/profile" method="post" enctype="multipart/form-data">
         <div class="mb-3">
             <label for="email" class="form-label">Email</label>
@@ -44,23 +43,22 @@
             <input type="file" class="form-control" id="avatarFile" name="avatarFile" onchange="previewAvatar(event)">
         </div>
         <div class="avatar-container">
-            <img class="avatar rounded-circle"  id="avatarPreview" alt="Avatar" src="/images/default/default-avatar.jpg">
+            <img class="avatar rounded-circle"  id="avatarPreview" alt="Avatar" src="/images/users/avatars/default/default-avatar.jpg">
             <span class="bi bi-arrow-right-circle avatar-arrow"></span>
-			<img th:src="${#authentication.principal.avatar != null ? 'images/users/' + #authentication.principal.avatar : '/images/default/default-avatar.jpg'}" class="avatar rounded-circle" alt="Avatar">
+			<img th:src="${#authentication.principal.avatar != null ? '/images/users/avatars/' + #authentication.principal.avatar : '/images/default/default-avatar.jpg'}" class="avatar rounded-circle" alt="Avatar">
         </div>
         <button type="submit" class="btn btn-primary mt-3">Update Profile</button>
     </form>
 
-    <!-- Flash Messages -->
     <div th:if="${errorMessage}" class="alert alert-danger mt-3" role="alert">
-        <span th:text="${errorMessage}">Error Message</span>
+        <span th:text="${errorMessage}">Lỗi!</span>
     </div>
     <div th:if="${successMessage}" class="alert alert-success mt-3" role="alert">
-        <span th:text="${successMessage}">Success Message</span>
+        <span th:text="${successMessage}">Cập nhật thành công!</span>
     </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.0/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrapt/5.2.0/js/bootstrap.bundle.min.js"></script>
 <script>
     function previewAvatar(event) {
         var input = event.target;

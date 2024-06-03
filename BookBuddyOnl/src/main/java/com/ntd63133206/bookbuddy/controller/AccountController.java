@@ -15,21 +15,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 
 import com.ntd63133206.bookbuddy.model.User;
-import com.ntd63133206.bookbuddy.model.CustomUserDetails;
 import com.ntd63133206.bookbuddy.model.Role;
-import com.ntd63133206.bookbuddy.service.CustomUserDetailsService;
 import com.ntd63133206.bookbuddy.service.EmailService;
 import com.ntd63133206.bookbuddy.service.UserService;
 import com.ntd63133206.bookbuddy.util.EmailUtils;
@@ -42,37 +36,22 @@ import jakarta.mail.PasswordAuthentication;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
-import jakarta.validation.Valid;
+
+
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Properties;
-import java.util.UUID;
-import java.util.Set;
-import net.bytebuddy.utility.RandomString;
 
 @RequestMapping("/account")
 @Controller
 public class AccountController {
     
 	@Autowired
-	private CustomUserDetailsService customUserDetailsService;
-	private final UserService userService;
-
-	public AccountController(CustomUserDetailsService customUserDetailsService, UserService userService) {
-	    this.customUserDetailsService = customUserDetailsService;
-	    this.userService = userService;
-	}
+	private UserService userService;
 
 	@Autowired
     private JavaMailSender mailSender;
+	@Autowired
+    private AuthenticationManager authenticationManager;
 
     @GetMapping("/register")
     public String showRegistrationForm(Model model) {
@@ -101,6 +80,7 @@ public class AccountController {
                 user.setAvatar(defaultAvatarPath);
             }
             userService.registerUser(user, avatarFile);
+            
             redirectAttributes.addFlashAttribute("successMessage", "Đăng ký thành công!");
             return "redirect:/account/login";
         } catch (IOException e) {
@@ -121,38 +101,38 @@ public class AccountController {
 
 
     @PostMapping("/login")
-    public String login(@ModelAttribute User user, Model model, HttpServletRequest request, RedirectAttributes redirectAttributes) {
-        CustomUserDetails customUserDetails;
+    public String login(Model model, HttpServletRequest request, RedirectAttributes redirectAttributes) {
+        String email = request.getParameter("email");
+        String password = request.getParameter("password");
+        System.out.println("Email: " + email);
+        System.out.println("Password: " + password);
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken(email, password);
+
         try {
-            customUserDetails = (CustomUserDetails) customUserDetailsService.loadUserByUsername(user.getUsername());
-            if (customUserDetails != null) {
-                System.out.println("Load ảnh: " + customUserDetails.getAvatar());
-                model.addAttribute("authentication", customUserDetails);
+            Authentication result = authenticationManager.authenticate(authentication);
+            SecurityContextHolder.getContext().setAuthentication(result);
+            System.out.println("Authentication result: " + result.toString());
 
-                boolean isAdmin = customUserDetails.getAuthorities().stream()
-                        .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
+            boolean isAdmin = result.getAuthorities().stream()
+                    .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
 
-                if (isAdmin) {
-                    return "redirect:/admin/";
-                } else {
-                    return "redirect:/";
-                }
+            if (isAdmin) {
+                return "redirect:/admin/";
             } else {
-                System.out.println("CustomUserDetails is null!");
-                model.addAttribute("errorMessage", "Tên người dùng hoặc mật khẩu không chính xác!");
-                return "account/login";
+                return "redirect:/";
             }
-        } catch (UsernameNotFoundException e) {
-            System.out.println("Tên người dùng không tồn tại.");
-            model.addAttribute("errorMessage", "Tên người dùng hoặc mật khẩu không chính xác!");
+        } catch (AuthenticationException e) {
+            System.out.println(e.getMessage());
             return "account/login";
         }
     }
 
 
+
     @GetMapping("/profile")
-    public String showEditProfileForm(Model model, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        User user = customUserDetails.getUser();
+    public String showEditProfileForm(Model model, @AuthenticationPrincipal User currentUser) {
+        User user = currentUser;
         model.addAttribute("user", user);
         return "account/profile";
     }
@@ -171,73 +151,72 @@ public class AccountController {
 
 
 
-    @GetMapping("/forgot-password")
-    public String showForgotPasswordForm() {
-        return "account/forgot-password";
-    }
+//    @GetMapping("/forgot-password")
+//    public String showForgotPasswordForm() {
+//        return "account/forgot-password";
+//    }
+//
+//    @PostMapping("/forgot-password")
+//    public String processForgotPassword(HttpServletRequest request, Model model) {
+//        String email = request.getParameter("email");
+//        String token = RandomString.make(30);
+//
+//        try {
+//            if (userService.existsByEmail(email)) {
+//                userService.updateResetPasswordToken(token, email);
+//                String resetPasswordLink = Utility.getSiteURL(request) + "/reset-password?token=" + token;
+//                if (sendEmail(email, resetPasswordLink)) {
+//                    model.addAttribute("message", "We have sent a reset password link to your email. Please check.");
+//                } else {
+//                    model.addAttribute("error", "Failed to send reset password email.");
+//                }
+//            } else {
+//                model.addAttribute("error", "Email address not found.");
+//            }
+//        } catch (Exception e) {
+//            model.addAttribute("error", e.getMessage());
+//        }
+//
+//        return "redirect:/account/forgot-password";
+//    }
 
-    @PostMapping("/forgot-password")
-    public String processForgotPassword(HttpServletRequest request, Model model) {
-        String email = request.getParameter("email");
-        String token = RandomString.make(30);
 
-        try {
-            if (userService.existsByEmail(email)) {
-                userService.updateResetPasswordToken(token, email);
-                String resetPasswordLink = Utility.getSiteURL(request) + "/reset-password?token=" + token;
-                if (sendEmail(email, resetPasswordLink)) {
-                    model.addAttribute("message", "We have sent a reset password link to your email. Please check.");
-                } else {
-                    model.addAttribute("error", "Failed to send reset password email.");
-                }
-            } else {
-                model.addAttribute("error", "Email address not found.");
-            }
-        } catch (Exception e) {
-            model.addAttribute("error", e.getMessage());
-        }
-
-        return "redirect:/account/forgot-password";
-    }
-
-
-    public boolean sendEmail(String recipientEmail, String link) {
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true);
-            Properties properties = new Properties();
-            properties.put("mail.smtp.auth", "true");
-            properties.put("mail.smtp.starttls.enable", "true");
-            properties.put("mail.smtp.host", "smtp.gmail.com");
-            properties.put("mail.smtp.port", "587");
-            properties.put("mail.smtp.username", "bookbuddy@gmail.com");
-            properties.put("mail.smtp.password", "NgoThanhDat2003");
-
-            Authenticator authenticator = new Authenticator() {
-                @Override
-                protected PasswordAuthentication getPasswordAuthentication() {
-                    return new PasswordAuthentication("bookbuddy@gmail.com", "NgoThanhDat2003");
-                }
-            };
-
-            Session session = Session.getInstance(properties, authenticator);
-
-            helper.setFrom("bookbuddy@gmail.com", "BookBuddy Support");
-            helper.setTo(recipientEmail);
-            String subject = "Here's the link to reset your password";
-            String content = EmailUtils.getEmailMessage("", link);
-            helper.setSubject(subject);
-            helper.setText(content, true);
-
-            // Gửi email
-            Transport.send(message);
-
-            return true;
-        } catch (Exception e) {
-            System.out.println("Failed to send email: " + e.getMessage());
-            return false;
-        }
-    }
+//    public boolean sendEmail(String recipientEmail, String link) {
+//        try {
+//            MimeMessage message = mailSender.createMimeMessage();
+//            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+//            Properties properties = new Properties();
+//            properties.put("mail.smtp.auth", "true");
+//            properties.put("mail.smtp.starttls.enable", "true");
+//            properties.put("mail.smtp.host", "smtp.gmail.com");
+//            properties.put("mail.smtp.port", "587");
+//            properties.put("mail.smtp.username", "bookbuddy@gmail.com");
+//            properties.put("mail.smtp.password", "NgoThanhDat2003");
+//
+//            Authenticator authenticator = new Authenticator() {
+//                @Override
+//                protected PasswordAuthentication getPasswordAuthentication() {
+//                    return new PasswordAuthentication("bookbuddy@gmail.com", "NgoThanhDat2003");
+//                }
+//            };
+//
+//            Session session = Session.getInstance(properties, authenticator);
+//
+//            helper.setFrom("bookbuddy@gmail.com", "BookBuddy Support");
+//            helper.setTo(recipientEmail);
+//            String subject = "Here's the link to reset your password";
+//            String content = EmailUtils.getEmailMessage("", link);
+//            helper.setSubject(subject);
+//            helper.setText(content, true);
+//
+//            Transport.send(message);
+//
+//            return true;
+//        } catch (Exception e) {
+//            System.out.println("Failed to send email: " + e.getMessage());
+//            return false;
+//        }
+//    }
 
 
 

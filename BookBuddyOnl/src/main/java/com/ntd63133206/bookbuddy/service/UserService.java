@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -29,18 +31,18 @@ import java.util.Set;
 import java.util.UUID;
 
 @Service
-public class UserService {
+public class UserService implements UserDetailsService{
 
 	private static final String UPLOAD_DIR = "src/main/resources/static/images/users/avatars/";
 
-    private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
-    private final PasswordEncoder passwordEncoder;
+    private UserRepository userRepository;
+    private RoleRepository roleRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, RoleRepository roleRepository) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
-        this.passwordEncoder = passwordEncoder;
     }
 
     public void createDefaultUserAndRole() {
@@ -104,6 +106,7 @@ public class UserService {
 
         Set<Role> roles = new HashSet<>();
         roles.add(roleUser);
+        
         String encodedPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(encodedPassword);
         user.setEnabled(true);
@@ -113,7 +116,8 @@ public class UserService {
             String avatarFileName = saveAvatar(avatarFile);
             user.setAvatar(avatarFileName);
         }
-
+        
+        user.setBalance(0);
         userRepository.save(user);
         return true;
     }
@@ -121,12 +125,14 @@ public class UserService {
     public boolean authenticateUser(String email, String password) {
         User user = userRepository.findByEmail(email);
         if (user != null && passwordEncoder.matches(password, user.getPassword())) {
+        	System.out.print("Đúng password!");
             LocalDateTime currentDateTime = LocalDateTime.now();
             Timestamp timestamp = Timestamp.valueOf(currentDateTime);
             user.setLastLogin(timestamp);
             userRepository.save(user);
             return true;
         }
+        System.out.print("Sai password!");
         return false;
     }
 
@@ -160,7 +166,7 @@ public class UserService {
     public void updateAvatar(User user, MultipartFile avatarFile) throws IOException {
         if (user != null) {
             String oldAvatarFileName = user.getAvatar();
-            if (oldAvatarFileName != null && !oldAvatarFileName.isEmpty()) {
+            if (oldAvatarFileName != null && !oldAvatarFileName.isEmpty()&& !user.getAvatar().equals("default/default-avatar.jpg")) {
                 deleteAvatar(oldAvatarFileName);
             }
             String avatarFileName = saveAvatar(avatarFile);
@@ -192,7 +198,7 @@ public class UserService {
 
             String originalFileName = avatarFile.getOriginalFilename();
             String fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
-            String filename = UUID.randomUUID().toString() + fileExtension; // Tên file với UUID + đuôi mở rộng
+            String filename = UUID.randomUUID().toString() + fileExtension;
 
             Path directory = Paths.get(UPLOAD_DIR);
 
@@ -246,6 +252,16 @@ public class UserService {
     public Optional<User> getUserById(Long id) {
         return userRepository.findById(id);
     }
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found");
+        }
+        return user;
+    }
+
+
 
     public void save(User user) {
         System.out.println("Saved user " + user.getEmail());
@@ -266,9 +282,6 @@ public class UserService {
         }
     }
 
-    public User getUserByUsername(String username) {
-        return userRepository.findByUsername(username);
-    }
 
     public Page<User> getAllUsers(Pageable pageable) {
         return userRepository.findAll(pageable);

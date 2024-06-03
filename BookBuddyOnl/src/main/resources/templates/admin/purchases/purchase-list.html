@@ -28,35 +28,15 @@
                     <th>User</th>
                     <th>Book</th>
                     <th>Date</th>
-                    <th>Status</th>
                     <th>Action</th>
                 </tr>
             </thead>
             <tbody>
-                <!-- Loop through purchases -->
                 <tr th:each="purchase : ${purchases}">
                     <td th:text="${purchase.id}"></td>
                     <td th:text="${purchase.user.username}"></td>
                     <td th:text="${purchase.book.title}"></td>
                     <td th:text="${purchase.purchaseDate}"></td>
-                    <td>
-                        <!-- Add color based on status -->
-                        <span th:text="${purchase.status}" 
-                              th:class="${purchase.status == 'SUCCESS' ? 'success-status' : 
-                                        purchase.status == 'PENDING' ? 'pending-status' :
-                                        purchase.status == 'FAILED' ? 'failed-status' : ''}">
-                        </span>
-                    </td>
-                    <td>
-                        <form th:action="@{'/admin/purchases/' + ${purchase.id} + '/edit'}" method="post">
-                            <select name="status" class="form-select">
-                                <option value="PENDING">Pending</option>
-                                <option value="SUCCESS">Success</option>
-                                <option value="FAILED">Failed</option>
-                            </select>
-                            <button type="submit" class="btn btn-primary">Update</button>
-                        </form>
-                    </td>
                 </tr>
             </tbody>
         </table>
